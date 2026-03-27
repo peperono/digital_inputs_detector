@@ -20,9 +20,9 @@
           <mxGeometry x="600" y="155" width="170" height="80" as="geometry" />
         </mxCell>
 
-        <!-- Suscriptores -->
-        <mxCell id="SYS-4" value="Suscriptores" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontStyle=1;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="900" y="180" width="130" height="60" as="geometry" />
+        <!-- Control AO -->
+        <mxCell id="SYS-4" value="&lt;b&gt;Control&lt;/b&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="900" y="155" width="170" height="80" as="geometry" />
         </mxCell>
 
         <!-- Flecha: Hardware IO → IOStateMonitor (IOReader callback) -->
