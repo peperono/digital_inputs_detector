@@ -2,6 +2,7 @@
 #include "signals.h"
 #include "IOStateMonitor/IOStateMonitor.h"
 #include "DigitalEdgeDetector/DigitalEdgeDetector.h"
+#include "Control/Control.h"
 #include <cstdio>
 #include <unordered_map>
 
@@ -11,6 +12,7 @@ static QP::QSubscrList subscrSto[MAX_SIG];
 // ── Event queues ──────────────────────────────────────────────────────────────
 static QP::QEvtPtr ioMonitorQSto[10];
 static QP::QEvtPtr edgeDetectorQSto[10];
+static QP::QEvtPtr controlQSto[10];
 
 // ── Simulated IO state ────────────────────────────────────────────────────────
 // In a real system, the IOReader callback lería registros de hardware.
@@ -38,6 +40,7 @@ static IOStateMonitor ioMonitor{
 };
 
 static DigitalEdgeDetector edgeDetector;
+static Control             control;
 
 // ── Callbacks requeridos por el port win32-qv ─────────────────────────────────
 namespace QP {
@@ -72,10 +75,12 @@ int main() {
     });
 
     // Arranca los AOs con sus colas de eventos y prioridades
-    // Prioridad 2 → IOStateMonitor tiene mayor prioridad (publica primero)
-    // Prioridad 1 → DigitalEdgeDetector procesa el evento publicado
-    ioMonitor.start(   2U, ioMonitorQSto,    Q_DIM(ioMonitorQSto),    nullptr, 0U);
-    edgeDetector.start(1U, edgeDetectorQSto, Q_DIM(edgeDetectorQSto), nullptr, 0U);
+    // Prioridad 3 → IOStateMonitor  (publica IO_STATE_CHANGED_SIG)
+    // Prioridad 2 → DigitalEdgeDetector (publica EDGE_DETECTED_SIG)
+    // Prioridad 1 → Control (consume EDGE_DETECTED_SIG)
+    ioMonitor.start(   3U, ioMonitorQSto,    Q_DIM(ioMonitorQSto),    nullptr, 0U);
+    edgeDetector.start(2U, edgeDetectorQSto, Q_DIM(edgeDetectorQSto), nullptr, 0U);
+    control.start(     1U, controlQSto,      Q_DIM(controlQSto),      nullptr, 0U);
 
     return QP::QF::run(); // cede el control al kernel QV
 }
