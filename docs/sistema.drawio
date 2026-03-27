@@ -21,7 +21,7 @@
         </mxCell>
 
         <!-- Control AO -->
-        <mxCell id="SYS-4" value="&lt;b&gt;Control&lt;/b&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="SYS-4" value="&lt;b&gt;Control&lt;/b&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;&lt;div&gt;imprime flanco detectado&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
           <mxGeometry x="900" y="155" width="170" height="80" as="geometry" />
         </mxCell>
 
