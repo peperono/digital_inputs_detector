@@ -6,7 +6,7 @@
         <mxCell id="1" parent="0" />
         <!-- Cuerpo principal del AO -->
         <mxCell id="IOM-1" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="87" y="64" width="357" height="206" as="geometry" />
+          <mxGeometry x="87" y="64" width="357" height="226" as="geometry" />
         </mxCell>
         <!-- Título -->
         <mxCell id="IOM-2" value="IOStateMonitor" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
@@ -32,10 +32,10 @@
         </mxCell>
         <!-- Fila: parámetros -->
         <mxCell id="IOM-8" value="poll_ticks: uint32_t" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="87" y="200" width="157" height="30" as="geometry" />
+          <mxGeometry x="87" y="200" width="157" height="50" as="geometry" />
         </mxCell>
         <mxCell id="IOM-9" value="reader: IOReader&lt;div&gt;function&amp;lt;void(inputs, outputs)&amp;gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="287" y="200" width="157" height="30" as="geometry" />
+          <mxGeometry x="287" y="200" width="157" height="50" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
