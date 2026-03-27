@@ -21,8 +21,18 @@
         </mxCell>
 
         <!-- Control AO -->
-        <mxCell id="SYS-4" value="&lt;b&gt;Control&lt;/b&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;&lt;div&gt;imprime flanco detectado&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+        <mxCell id="SYS-4" value="&lt;b&gt;Control&lt;/b&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
           <mxGeometry x="900" y="155" width="170" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Nota UML: función de Control -->
+        <mxCell id="SYS-9" value="imprime flanco detectado" style="shape=note;whiteSpace=wrap;html=1;fontSize=10;fillColor=#fff9c4;strokeColor=#d6b656;size=12;" vertex="1" parent="1">
+          <mxGeometry x="910" y="270" width="150" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Línea punteada: nota → Control -->
+        <mxCell id="SYS-10" value="" style="edgeStyle=none;html=1;dashed=1;endArrow=none;" edge="1" source="SYS-9" target="SYS-4" parent="1">
+          <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
         <!-- Flecha: Hardware IO → IOStateMonitor (IOReader callback) -->
