@@ -1,0 +1,56 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.2.8 Chrome/140.0.7339.240 Electron/38.4.0 Safari/537.36" version="28.2.8">
+  <diagram name="Sistema" id="SistemaDiagram">
+    <mxGraphModel dx="900" dy="500" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Hardware IO -->
+        <mxCell id="SYS-1" value="Hardware IO" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="60" y="180" width="130" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- IOStateMonitor AO -->
+        <mxCell id="SYS-2" value="&lt;b&gt;IOStateMonitor&lt;/b&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;&lt;div&gt;poll_ticks: uint32_t&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="290" y="155" width="170" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- DigitalEdgeDetector AO -->
+        <mxCell id="SYS-3" value="&lt;b&gt;DigitalEdgeDetector&lt;/b&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;&lt;div&gt;configs: InputConfig[]&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="600" y="155" width="170" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Suscriptores -->
+        <mxCell id="SYS-4" value="Suscriptores" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#333333;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="900" y="180" width="130" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Flecha: Hardware IO → IOStateMonitor (IOReader callback) -->
+        <mxCell id="SYS-5" value="IOReader callback" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="SYS-1" target="SYS-2" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Flecha: IOStateMonitor → DigitalEdgeDetector (IO_STATE_CHANGED_SIG) -->
+        <mxCell id="SYS-6" value="IO_STATE_CHANGED_SIG&lt;div&gt;IOStateEvt&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#6c8ebf;" edge="1" source="SYS-2" target="SYS-3" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Flecha: DigitalEdgeDetector → Suscriptores (EDGE_DETECTED_SIG) -->
+        <mxCell id="SYS-7" value="EDGE_DETECTED_SIG&lt;div&gt;EdgeDetectedEvt&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#82b366;" edge="1" source="SYS-3" target="SYS-4" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- QTimeEvt: auto-flecha en IOStateMonitor -->
+        <mxCell id="SYS-8" value="IO_MONITOR_POLL_SIG&lt;div&gt;(QTimeEvt)&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#d6b656;curved=1;" edge="1" source="SYS-2" target="SYS-2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="375" y="100" />
+              <mxPoint x="375" y="100" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
