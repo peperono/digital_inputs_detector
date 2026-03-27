@@ -1,0 +1,28 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.2.8 Chrome/140.0.7339.240 Electron/38.4.0 Safari/537.36" version="28.2.8">
+  <diagram name="Página-1" id="IOStateMonitorDiagram">
+    <mxGraphModel dx="595" dy="387" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="IOM-1" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="87" y="64" width="357" height="156" as="geometry" />
+        </mxCell>
+        <mxCell id="IOM-2" value="IOStateMonitor" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="87" y="32" width="357" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="IOM-3" value="IO_MONITOR_POLL_SIG" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="87" y="116" width="157" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="IOM-4" value="IO_STATE_CHANGED_SIG" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="287" y="116" width="157" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="IOM-5" value="(QTimeEvt interno)&lt;div&gt;poll_ticks: uint32_t&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="87" y="140" width="157" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="IOM-6" value="inputs:map&amp;lt;int,bool&amp;gt;&lt;div&gt;outputs:map&amp;lt;int,bool&amp;gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="287" y="140" width="157" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
