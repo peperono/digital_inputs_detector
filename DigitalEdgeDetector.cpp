@@ -1,11 +1,11 @@
-#include "DigitalInputDetector.h"
+#include "DigitalEdgeDetector.h"
 
-void DigitalInputDetector::configure(const std::vector<InputConfig>& configs) {
+void DigitalEdgeDetector::configure(const std::vector<InputConfig>& configs) {
     configs_ = configs;
     prev_states_.clear();
 }
 
-std::vector<int> DigitalInputDetector::process(
+std::vector<int> DigitalEdgeDetector::process(
     const std::unordered_map<int, bool>& input_states,
     const std::unordered_map<int, bool>& output_states)
 {
@@ -31,7 +31,7 @@ std::vector<int> DigitalInputDetector::process(
     return pulses;
 }
 
-bool DigitalInputDetector::detection_enabled(
+bool DigitalEdgeDetector::detection_enabled(
     const InputConfig& cfg,
     const std::unordered_map<int, bool>& output_states) const
 {

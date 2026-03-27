@@ -1,7 +1,7 @@
-// Compile & run (MSVC):  cl /EHsc /std:c++17 test_DigitalInputDetector.cpp DigitalInputDetector.cpp && test_DigitalInputDetector.exe
-// Compile & run (GCC):   g++ -std=c++17 -o test_dd test_DigitalInputDetector.cpp DigitalInputDetector.cpp && ./test_dd
+// Compile & run (MSVC):  cl /EHsc /std:c++17 test_DigitalEdgeDetector.cpp DigitalEdgeDetector.cpp && test_DigitalEdgeDetector.exe
+// Compile & run (GCC):   g++ -std=c++17 -o test_dd test_DigitalEdgeDetector.cpp DigitalEdgeDetector.cpp && ./test_dd
 
-#include "DigitalInputDetector.h"
+#include "DigitalEdgeDetector.h"
 #include <cassert>
 #include <cstdio>
 
@@ -25,7 +25,7 @@ static std::unordered_map<int, bool> states(std::initializer_list<std::pair<cons
 // Rising edge (logic_positive=true) triggers a pulse
 static void test_rising_edge_triggers()
 {
-    DigitalInputDetector d;
+    DigitalEdgeDetector d;
     d.configure({make_cfg(1, /*logic_positive=*/true, /*always=*/true)});
 
     // First call: prev is initialised to current (false), no edge
@@ -46,7 +46,7 @@ static void test_rising_edge_triggers()
 // Falling edge (logic_positive=false) triggers a pulse
 static void test_falling_edge_triggers()
 {
-    DigitalInputDetector d;
+    DigitalEdgeDetector d;
     d.configure({make_cfg(1, /*logic_positive=*/false, /*always=*/true)});
 
     d.process(states({{1, true}}), {});           // establish prev = true
@@ -61,7 +61,7 @@ static void test_falling_edge_triggers()
 // Rising edge does NOT trigger for logic_positive=false
 static void test_rising_edge_no_pulse_when_logic_negative()
 {
-    DigitalInputDetector d;
+    DigitalEdgeDetector d;
     d.configure({make_cfg(1, /*logic_positive=*/false, /*always=*/true)});
 
     d.process(states({{1, false}}), {});           // prev = false
@@ -75,7 +75,7 @@ static void test_rising_edge_no_pulse_when_logic_negative()
 // detection_always=false: no pulse when all linked outputs are inactive
 static void test_no_pulse_when_outputs_inactive()
 {
-    DigitalInputDetector d;
+    DigitalEdgeDetector d;
     d.configure({make_cfg(1, true, /*always=*/false, {10, 11})});
 
     d.process(states({{1, false}}), states({{10, false}, {11, false}}));
@@ -89,7 +89,7 @@ static void test_no_pulse_when_outputs_inactive()
 // detection_always=false: pulse fires when at least one linked output is active
 static void test_pulse_when_one_output_active()
 {
-    DigitalInputDetector d;
+    DigitalEdgeDetector d;
     d.configure({make_cfg(1, true, /*always=*/false, {10, 11})});
 
     d.process(states({{1, false}}), states({{10, false}, {11, true}}));
@@ -103,7 +103,7 @@ static void test_pulse_when_one_output_active()
 // Input absent from input_states map → no pulse, no crash
 static void test_missing_input_is_ignored()
 {
-    DigitalInputDetector d;
+    DigitalEdgeDetector d;
     d.configure({make_cfg(1, true, true)});
 
     auto r = d.process(/*empty*/{}, {});
@@ -115,7 +115,7 @@ static void test_missing_input_is_ignored()
 // configure() resets prev_states so a fresh rising edge is detected again
 static void test_reconfigure_resets_state()
 {
-    DigitalInputDetector d;
+    DigitalEdgeDetector d;
     d.configure({make_cfg(1, true, true)});
 
     d.process(states({{1, true}}), {});   // prev becomes true
@@ -139,7 +139,7 @@ static void test_reconfigure_resets_state()
 // Multiple inputs independently detected in the same call
 static void test_multiple_inputs_same_cycle()
 {
-    DigitalInputDetector d;
+    DigitalEdgeDetector d;
     d.configure({
         make_cfg(1, true,  true),
         make_cfg(2, false, true),

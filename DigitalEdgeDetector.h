@@ -9,7 +9,7 @@ struct InputConfig {
     std::vector<int> linked_outputs;
 };
 
-struct DigitalInputDetector {
+struct DigitalEdgeDetector {
     void configure(const std::vector<InputConfig>& configs);
     // Returns IDs of inputs that generated an activation pulse
     std::vector<int> process(const std::unordered_map<int, bool>& input_states,
