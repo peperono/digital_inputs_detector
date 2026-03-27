@@ -4,7 +4,14 @@
 #include "DigitalEdgeDetector/DigitalEdgeDetector.h"
 #include "Control/Control.h"
 #include <cstdio>
+#include <cstdlib>
 #include <unordered_map>
+
+// ── QP assertion handler (requerido por el framework) ─────────────────────────
+extern "C" Q_NORETURN Q_onError(char const * const module, int_t const id) {
+    std::fprintf(stderr, "Q_onError: %s:%d\n", module, id);
+    std::exit(1);
+}
 
 // ── QF pub/sub table ──────────────────────────────────────────────────────────
 static QP::QSubscrList subscrSto[MAX_SIG];
