@@ -3,9 +3,9 @@
 #include "IOStateMonitor/IOStateMonitor.h"
 #include "DigitalEdgeDetector/DigitalEdgeDetector.h"
 #include "Control/Control.h"
+#include "TestIOReader.hpp"
 #include <cstdio>
 #include <cstdlib>
-#include <unordered_map>
 
 // ── QP assertion handler (requerido por el framework) ─────────────────────────
 extern "C" Q_NORETURN Q_onError(char const * const module, int_t const id) {
@@ -21,30 +21,8 @@ static QP::QEvtPtr ioMonitorQSto[10];
 static QP::QEvtPtr edgeDetectorQSto[10];
 static QP::QEvtPtr controlQSto[10];
 
-// ── Simulated IO state ────────────────────────────────────────────────────────
-// In a real system, the IOReader callback lería registros de hardware.
-// Aquí simulamos que la entrada 1 cambia de estado cada 5 ciclos de polling.
-static std::unordered_map<int, bool> s_inputs  = {{1, false}, {2, true}};
-static std::unordered_map<int, bool> s_outputs = {{10, true}};
-static int s_pollCount = 0;
-
 // ── Active object instances ───────────────────────────────────────────────────
-static IOStateMonitor ioMonitor{
-    // IOReader: callback que llena el snapshot de IO
-    [](std::unordered_map<int, bool>& inputs,
-       std::unordered_map<int, bool>& outputs)
-    {
-        ++s_pollCount;
-        if (s_pollCount % 5 == 0) {       // toggle entrada 1 cada 5 polls
-            s_inputs[1] = !s_inputs[1];
-            std::printf("[IOReader] entrada 1 -> %s\n",
-                        s_inputs[1] ? "ON" : "OFF");
-        }
-        inputs  = s_inputs;
-        outputs = s_outputs;
-    },
-    5U  // poll cada 5 ticks QF (= 500 ms con tick rate de 10 Hz)
-};
+static IOStateMonitor ioMonitor{ makeTestReader(), 10U };
 
 static DigitalEdgeDetector edgeDetector;
 static Control             control;
@@ -79,6 +57,12 @@ int main() {
     // Configura el detector: entrada 1, flanco de subida, siempre activa
     edgeDetector.configure({
         InputConfig{1, /*logic_positive=*/true, /*always=*/true, {}}
+    });
+
+    // Conecta el callback de test: Control notifica los IDs detectados
+    control.setOnEdgeDetected([](const std::vector<int>& ids) {
+        g_detectedEdges = ids;
+        g_edgeReceived  = true;
     });
 
     // Arranca los AOs con sus colas de eventos y prioridades
