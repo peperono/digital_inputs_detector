@@ -1,5 +1,7 @@
 #pragma once
 #include "IOStateMonitor/IOStateMonitor.h"
+#include "qpcpp/include/qpcpp.hpp"
+#include "signals.h"
 #include <vector>
 #include <algorithm>
 #include <cstdio>
@@ -14,11 +16,54 @@ struct TestStep {
 };
 
 // ── Resultado compartido ──────────────────────────────────────────────────────
-// Control escribe aquí vía setOnEdgeDetected. El test reader lee en el
-// siguiente poll (QV garantiza que Control procesó el evento antes).
+// TestObserver escribe aquí al recibir EDGE_DETECTED_SIG.
+// El test reader lee en el siguiente poll.
 
 static std::vector<int> g_detectedEdges;
 static bool             g_edgeReceived = false;
+
+// ── TestObserver ──────────────────────────────────────────────────────────────
+// AO de test que suscribe a EDGE_DETECTED_SIG y registra los IDs recibidos.
+// No toca el código de producción.
+
+class TestObserver : public QP::QActive {
+public:
+    explicit TestObserver() noexcept
+        : QP::QActive{Q_STATE_CAST(&TestObserver::initial)}
+    {}
+
+private:
+    Q_STATE_DECL(initial);
+    Q_STATE_DECL(observing);
+};
+
+Q_STATE_DEF(TestObserver, initial) {
+    Q_UNUSED_PAR(e);
+    subscribe(EDGE_DETECTED_SIG);
+    return tran(&TestObserver::observing);
+}
+
+Q_STATE_DEF(TestObserver, observing) {
+    QP::QState status;
+    switch (e->sig) {
+        case Q_ENTRY_SIG: {
+            status = Q_HANDLED();
+            break;
+        }
+        case EDGE_DETECTED_SIG: {
+            auto const* evt = Q_EVT_CAST(EdgeDetectedEvt);
+            g_detectedEdges = evt->input_ids;
+            g_edgeReceived  = true;
+            status = Q_HANDLED();
+            break;
+        }
+        default: {
+            status = super(&TestObserver::top);
+            break;
+        }
+    }
+    return status;
+}
 
 // ── Verificación ──────────────────────────────────────────────────────────────
 
@@ -86,22 +131,22 @@ static void verifyStep(int stepIdx, const TestStep& s) {
 inline IOReader makeTestReader() {
     static const std::vector<TestStep> steps = {
         { {{1,false},{2,false}}, {{10,false}},
-          "inicial entrada 1=OFF",                          {} },
+          "inicial entrada 1=OFF",                           {} },
 
         { {{1,false},{2,false}}, {{10,false}},
-          "sin cambio",                                     {} },
+          "sin cambio",                                      {} },
 
         { {{1,true}, {2,false}}, {{10,false}},
-          "SUBIDA entrada 1",                               {1} },
+          "SUBIDA entrada 1",                                {1} },
 
         { {{1,true}, {2,false}}, {{10,false}},
-          "sin cambio",                                     {} },
+          "sin cambio",                                      {} },
 
         { {{1,false},{2,false}}, {{10,false}},
-          "BAJADA entrada 1 (ignorada, logic_positive=true)",{} },
+          "BAJADA entrada 1 (ignorada, logic_positive=true)", {} },
 
         { {{1,true}, {2,false}}, {{10,false}},
-          "segunda SUBIDA entrada 1",                       {1} },
+          "segunda SUBIDA entrada 1",                        {1} },
 
         { {{1,false},{2,true}},  {{10,false}},
           "entrada 2 sube (no configurada) + entrada 1 baja",{} },

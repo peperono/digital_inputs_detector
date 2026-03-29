@@ -1,2 +1,9 @@
 @echo off
-C:\msys64\msys2_shell.cmd -mingw64 -no-start -defterm -here -c "cd '%~dp0' && bash build.sh && echo && echo Ejecutando app... && echo && ./build/app.exe"
+set PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%
+cd /d %~dp0
+bash build.sh
+echo.
+echo Ejecutando app...
+echo.
+build\app.exe
+pause

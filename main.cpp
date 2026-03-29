@@ -20,12 +20,13 @@ static QP::QSubscrList subscrSto[MAX_SIG];
 static QP::QEvtPtr ioMonitorQSto[10];
 static QP::QEvtPtr edgeDetectorQSto[10];
 static QP::QEvtPtr controlQSto[10];
+static QP::QEvtPtr testObserverQSto[10];
 
 // ── Active object instances ───────────────────────────────────────────────────
-static IOStateMonitor ioMonitor{ makeTestReader(), 10U };
-
+static IOStateMonitor      ioMonitor{ makeTestReader(), 10U };
 static DigitalEdgeDetector edgeDetector;
 static Control             control;
+static TestObserver        testObserver;
 
 // ── Callbacks requeridos por el port win32-qv ─────────────────────────────────
 namespace QP {
@@ -59,19 +60,15 @@ int main() {
         InputConfig{1, /*logic_positive=*/true, /*always=*/true, {}}
     });
 
-    // Conecta el callback de test: Control notifica los IDs detectados
-    control.setOnEdgeDetected([](const std::vector<int>& ids) {
-        g_detectedEdges = ids;
-        g_edgeReceived  = true;
-    });
-
     // Arranca los AOs con sus colas de eventos y prioridades
-    // Prioridad 3 → IOStateMonitor  (publica IO_STATE_CHANGED_SIG)
-    // Prioridad 2 → DigitalEdgeDetector (publica EDGE_DETECTED_SIG)
-    // Prioridad 1 → Control (consume EDGE_DETECTED_SIG)
-    ioMonitor.start(   3U, ioMonitorQSto,    Q_DIM(ioMonitorQSto),    nullptr, 0U);
-    edgeDetector.start(2U, edgeDetectorQSto, Q_DIM(edgeDetectorQSto), nullptr, 0U);
-    control.start(     1U, controlQSto,      Q_DIM(controlQSto),      nullptr, 0U);
+    // Prioridad 4 → IOStateMonitor      (publica IO_STATE_CHANGED_SIG)
+    // Prioridad 3 → DigitalEdgeDetector (publica EDGE_DETECTED_SIG)
+    // Prioridad 2 → Control             (consume EDGE_DETECTED_SIG)
+    // Prioridad 1 → TestObserver        (observa EDGE_DETECTED_SIG sin tocar Control)
+    ioMonitor.start(   4U, ioMonitorQSto,     Q_DIM(ioMonitorQSto),     nullptr, 0U);
+    edgeDetector.start(3U, edgeDetectorQSto,  Q_DIM(edgeDetectorQSto),  nullptr, 0U);
+    control.start(     2U, controlQSto,       Q_DIM(controlQSto),       nullptr, 0U);
+    testObserver.start(1U, testObserverQSto,  Q_DIM(testObserverQSto),  nullptr, 0U);
 
     return QP::QF::run(); // cede el control al kernel QV
 }
