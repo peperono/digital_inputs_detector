@@ -1,4 +1,5 @@
 #include "Monitor.h"
+#include "../SharedState.h"
 #include <cstdio>
 
 // ── Constructor ───────────────────────────────────────────────────────────────
@@ -36,6 +37,11 @@ Q_STATE_DEF(Monitor, running) {
             for (auto const& [id, state] : evt->outputs) {
                 std::printf("[Monitor] salida  %d -> %s\n", id, state ? "ON" : "OFF");
             }
+            {
+                std::lock_guard<std::mutex> lk(g_state.mtx);
+                g_state.inputs  = evt->inputs;
+                g_state.outputs = evt->outputs;
+            }
             status = Q_HANDLED();
             break;
         }
@@ -44,6 +50,10 @@ Q_STATE_DEF(Monitor, running) {
             auto const* evt = Q_EVT_CAST(EdgeDetectedEvt);
             for (int id : evt->input_ids) {
                 std::printf("[Monitor] flanco detectado en entrada %d\n", id);
+            }
+            {
+                std::lock_guard<std::mutex> lk(g_state.mtx);
+                g_state.last_edges = evt->input_ids;
             }
             status = Q_HANDLED();
             break;

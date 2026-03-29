@@ -2,9 +2,13 @@
 #include "signals.h"
 #include "DigitalEdgeDetector/DigitalEdgeDetector.h"
 #include "Monitor/Monitor.h"
+#include "HttpServer/HttpServer.h"
+#include "SharedState.h"
 #include "TestIOReader.hpp"
 #include <cstdio>
 #include <cstdlib>
+
+SharedState g_state;
 
 // ── QP assertion handler (requerido por el framework) ─────────────────────────
 extern "C" Q_NORETURN Q_onError(char const * const module, int_t const id) {
@@ -62,5 +66,10 @@ int main() {
     monitor.start(     2U, controlQSto,       Q_DIM(controlQSto),       nullptr, 0U);
     testObserver.start(1U, testObserverQSto,  Q_DIM(testObserverQSto),  nullptr, 0U);
 
-    return QP::QF::run();
+    HttpServer::start(8080);
+
+    int ret = QP::QF::run();
+
+    HttpServer::stop();
+    return ret;
 }
