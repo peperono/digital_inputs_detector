@@ -16,9 +16,8 @@ g++ -std=c++17 -Wall -O1 -static \
     -I"$QPCPP/src" \
     -I"$QPCPP/ports/win32-qv" \
     "$ROOT/main.cpp" \
-    "$ROOT/IOStateMonitor/IOStateMonitor.cpp" \
     "$ROOT/DigitalEdgeDetector/DigitalEdgeDetector.cpp" \
-    "$ROOT/Control/Control.cpp" \
+    "$ROOT/Monitor/Monitor.cpp" \
     "$QPCPP/src/qf/qep_hsm.cpp" \
     "$QPCPP/src/qf/qep_msm.cpp" \
     "$QPCPP/src/qf/qf_act.cpp" \

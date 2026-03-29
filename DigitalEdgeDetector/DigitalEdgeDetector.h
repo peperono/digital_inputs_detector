@@ -1,8 +1,14 @@
 #pragma once
 #include "../qpcpp/include/qpcpp.hpp"
 #include "../signals.h"
+#include <functional>
 #include <vector>
 #include <unordered_map>
+#include <cstdint>
+
+using IOReader = std::function<void(
+    std::unordered_map<int, bool>& inputs,
+    std::unordered_map<int, bool>& outputs)>;
 
 struct InputConfig {
     int  id;
@@ -12,20 +18,26 @@ struct InputConfig {
 };
 
 // ── DigitalEdgeDetector ───────────────────────────────────────────────────────
-// Active Object that subscribes to IO_STATE_CHANGED_SIG (published by
-// IOStateMonitor) and detects configured rising/falling edges.
-// Publishes EdgeDetectedEvt on EDGE_DETECTED_SIG when one or more edges fire.
+// Active Object that periodically polls IO via an IOReader callback,
+// detects configured rising/falling edges, and publishes EDGE_DETECTED_SIG.
 class DigitalEdgeDetector : public QP::QActive {
 public:
-    explicit DigitalEdgeDetector() noexcept;
+    explicit DigitalEdgeDetector(IOReader reader, std::uint32_t poll_ticks) noexcept;
 
-    // Must be called before starting the AO (or from initial pseudo-state).
+    // Must be called before starting the AO.
     void configure(const std::vector<InputConfig>& configs);
 
 private:
+    QP::QTimeEvt  m_pollTimer;
+    IOReader      m_reader;
+    std::uint32_t m_pollTicks;
+
     std::vector<InputConfig>      m_configs;
     std::unordered_map<int, bool> m_prevStates;
-    EdgeDetectedEvt               m_edgeEvt; // reused static event
+    std::unordered_map<int, bool> m_prevInputs;
+    std::unordered_map<int, bool> m_prevOutputs;
+    IOStateEvt                    m_ioEvt;
+    EdgeDetectedEvt               m_edgeEvt;
 
     bool detection_enabled(const InputConfig& cfg,
                             const std::unordered_map<int, bool>& outputs) const;

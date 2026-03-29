@@ -10,62 +10,57 @@
           <mxGeometry x="60" y="180" width="130" height="60" as="geometry" />
         </mxCell>
 
-        <!-- IOStateMonitor AO -->
-        <mxCell id="SYS-2" value="&lt;b&gt;IOStateMonitor&lt;/b&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;&lt;div&gt;poll_ticks: uint32_t&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="290" y="155" width="170" height="80" as="geometry" />
-        </mxCell>
-
         <!-- DigitalEdgeDetector AO -->
-        <mxCell id="SYS-3" value="&lt;b&gt;DigitalEdgeDetector&lt;/b&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;&lt;div&gt;configs: InputConfig[]&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="600" y="155" width="170" height="80" as="geometry" />
+        <mxCell id="SYS-3" value="&lt;b&gt;DigitalEdgeDetector&lt;/b&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;&lt;div&gt;reader: IOReader&lt;/div&gt;&lt;div&gt;poll_ticks: uint32_t&lt;/div&gt;&lt;div&gt;configs: InputConfig[]&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="290" y="145" width="180" height="100" as="geometry" />
         </mxCell>
 
-        <!-- Control AO (abstracto: comportamiento dependiente de plataforma) -->
-        <mxCell id="SYS-4" value="«abstract»&lt;div&gt;&lt;b&gt;Control&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;dashed=1;" vertex="1" parent="1">
-          <mxGeometry x="900" y="155" width="170" height="80" as="geometry" />
+        <!-- Monitor AO (abstracto) -->
+        <mxCell id="SYS-4" value="«abstract»&lt;div&gt;&lt;b&gt;Monitor&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="155" width="170" height="80" as="geometry" />
         </mxCell>
 
         <!-- Implementación Win32 -->
-        <mxCell id="SYS-9" value="&lt;b&gt;Control_Win32&lt;/b&gt;&lt;div&gt;imprime mensaje&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="820" y="330" width="150" height="60" as="geometry" />
+        <mxCell id="SYS-9" value="&lt;b&gt;Monitor_Win32&lt;/b&gt;&lt;div&gt;imprime mensaje&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="540" y="330" width="150" height="60" as="geometry" />
         </mxCell>
 
         <!-- Implementación ESP32 -->
-        <mxCell id="SYS-11" value="&lt;b&gt;Control_ESP32&lt;/b&gt;&lt;div&gt;activa salida digital&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="1000" y="330" width="150" height="60" as="geometry" />
+        <mxCell id="SYS-11" value="&lt;b&gt;Monitor_ESP32&lt;/b&gt;&lt;div&gt;activa salida digital&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="720" y="330" width="150" height="60" as="geometry" />
         </mxCell>
 
-        <!-- Realización: Win32 → Control -->
+        <!-- Realización: Win32 → Monitor -->
         <mxCell id="SYS-10" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=block;endFill=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.2;entryY=1;entryDx=0;entryDy=0;" edge="1" source="SYS-9" target="SYS-4" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
-        <!-- Realización: ESP32 → Control -->
+        <!-- Realización: ESP32 → Monitor -->
         <mxCell id="SYS-12" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=block;endFill=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.8;entryY=1;entryDx=0;entryDy=0;" edge="1" source="SYS-11" target="SYS-4" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
-        <!-- Flecha: Hardware IO → IOStateMonitor (IOReader callback) -->
-        <mxCell id="SYS-5" value="IOReader callback" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="SYS-1" target="SYS-2" parent="1">
+        <!-- Flecha: Hardware IO → DigitalEdgeDetector (IOReader callback) -->
+        <mxCell id="SYS-5" value="IOReader callback" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="SYS-1" target="SYS-3" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
-        <!-- Flecha: IOStateMonitor → DigitalEdgeDetector (IO_STATE_CHANGED_SIG) -->
-        <mxCell id="SYS-6" value="IO_STATE_CHANGED_SIG&lt;div&gt;IOStateEvt&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#6c8ebf;" edge="1" source="SYS-2" target="SYS-3" parent="1">
+        <!-- Flecha: DigitalEdgeDetector → Monitor (IO_STATE_CHANGED_SIG) -->
+        <mxCell id="SYS-6" value="IO_STATE_CHANGED_SIG&lt;div&gt;IOStateEvt&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=1;exitY=0.35;exitDx=0;exitDy=0;entryX=0;entryY=0.35;entryDx=0;entryDy=0;strokeColor=#6c8ebf;" edge="1" source="SYS-3" target="SYS-4" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
-        <!-- Flecha: DigitalEdgeDetector → Suscriptores (EDGE_DETECTED_SIG) -->
-        <mxCell id="SYS-7" value="EDGE_DETECTED_SIG&lt;div&gt;EdgeDetectedEvt&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#82b366;" edge="1" source="SYS-3" target="SYS-4" parent="1">
+        <!-- Flecha: DigitalEdgeDetector → Monitor (EDGE_DETECTED_SIG) -->
+        <mxCell id="SYS-7" value="EDGE_DETECTED_SIG&lt;div&gt;EdgeDetectedEvt&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=1;exitY=0.65;exitDx=0;exitDy=0;entryX=0;entryY=0.65;entryDx=0;entryDy=0;strokeColor=#82b366;" edge="1" source="SYS-3" target="SYS-4" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
-        <!-- QTimeEvt: auto-flecha en IOStateMonitor -->
-        <mxCell id="SYS-8" value="IO_MONITOR_POLL_SIG&lt;div&gt;(QTimeEvt)&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#d6b656;curved=1;" edge="1" source="SYS-2" target="SYS-2" parent="1">
+        <!-- QTimeEvt: auto-flecha en DigitalEdgeDetector -->
+        <mxCell id="SYS-8" value="EDGE_DETECTOR_POLL_SIG&lt;div&gt;(QTimeEvt)&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#d6b656;curved=1;" edge="1" source="SYS-3" target="SYS-3" parent="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="375" y="100" />
-              <mxPoint x="375" y="100" />
+              <mxPoint x="380" y="90" />
+              <mxPoint x="380" y="90" />
             </Array>
           </mxGeometry>
         </mxCell>
