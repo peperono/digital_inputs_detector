@@ -10,7 +10,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-SharedState      g_state;
+SharedState       g_state;
 RemoteReaderState g_remoteState;
 
 // ── QP assertion handler (requerido por el framework) ─────────────────────────

@@ -83,6 +83,7 @@ static const char* s_html = R"html(<!DOCTYPE html>
 
   <script>
     let ws = null;
+    let controlsReady = false;
     const controlState = { inputs: {}, outputs: {} };
 
     const statusEl    = document.getElementById('status');
@@ -148,12 +149,13 @@ static const char* s_html = R"html(<!DOCTYPE html>
       container.appendChild(btn);
     }
 
-    function initControls(config) {
-      if (!config.remote) return;
+    function initControls(inputs, outputs) {
+      Object.keys(inputs).sort((a,b)  => Number(a)-Number(b))
+        .forEach(id => makeToggle(ctrlInputs,  'Entrada', Number(id), controlState.inputs));
+      Object.keys(outputs).sort((a,b) => Number(a)-Number(b))
+        .forEach(id => makeToggle(ctrlOutputs, 'Salida',  Number(id), controlState.outputs));
       ctrlSection.style.display = 'block';
-      config.inputs.forEach(id  => makeToggle(ctrlInputs,  'Entrada', id, controlState.inputs));
-      config.outputs.forEach(id => makeToggle(ctrlOutputs, 'Salida',  id, controlState.outputs));
-      sendControl(); // enviar estado inicial (todo OFF)
+      sendControl();
     }
 
     function connect() {
@@ -171,22 +173,17 @@ static const char* s_html = R"html(<!DOCTYPE html>
       ws.onerror = () => ws.close();
       ws.onmessage = ({ data }) => {
         const d = JSON.parse(data);
+        if (!controlsReady && d.inputs && d.outputs) {
+          initControls(d.inputs, d.outputs);
+          controlsReady = true;
+        }
         if (d.inputs)  updateInputsTable(d.inputs, d.edge_counts || {});
         if (d.outputs) updateOutputsTable(d.outputs);
         if (d.last_edges && d.last_edges.length > 0) addEdgeEntry(d.last_edges);
       };
     }
 
-    async function init() {
-      try {
-        const resp = await fetch('/config');
-        const config = await resp.json();
-        initControls(config);
-      } catch(e) {}
-      connect();
-    }
-
-    init();
+    connect();
   </script>
 </body>
 </html>
@@ -357,7 +354,7 @@ static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
 
         } else if (mg_match(hm->uri, mg_str("/"), NULL)) {
             // Servir HTML sin pasar por printf (evita interpretar % del CSS)
-            mg_printf(c, "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: %u\r\n\r\n",
+            mg_printf(c, "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nCache-Control: no-cache\r\nContent-Length: %u\r\n\r\n",
                       (unsigned)std::strlen(s_html));
             mg_send(c, s_html, std::strlen(s_html));
 
