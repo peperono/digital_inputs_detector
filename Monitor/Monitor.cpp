@@ -54,6 +54,10 @@ Q_STATE_DEF(Monitor, running) {
             {
                 std::lock_guard<std::mutex> lk(g_state.mtx);
                 g_state.last_edges = evt->input_ids;
+                ++g_state.edge_gen;
+                for (int id : evt->input_ids) {
+                    ++g_state.edge_counts[id];
+                }
             }
             status = Q_HANDLED();
             break;
