@@ -263,46 +263,30 @@ static void parse_bool_object(struct mg_str s, std::unordered_map<int, bool>& re
     }
 }
 
-// ── Cambios de estado → push WebSocket ───────────────────────────────────────
+// ── push_pending → push WebSocket ────────────────────────────────────────────
 
-struct Snapshot {
-    std::unordered_map<int, bool> inputs;
-    std::unordered_map<int, bool> outputs;
-    std::uint32_t                 edge_gen{0};
-};
+static void push_if_pending(struct mg_mgr* mgr) {
+    if (!g_state.push_pending.load()) return;
+    g_state.push_pending.store(false);
 
-static Snapshot s_last;
-
-static void push_if_changed(struct mg_mgr* mgr) {
     std::unordered_map<int, bool> inputs, outputs;
     std::unordered_map<int, int>  counts;
     std::vector<int>              edges;
-    std::uint32_t                 gen;
     {
         std::lock_guard<std::mutex> lk(g_state.mtx);
         inputs  = g_state.inputs;
         outputs = g_state.outputs;
         edges   = g_state.last_edges;
         counts  = g_state.edge_counts;
-        gen     = g_state.edge_gen;
     }
 
-    bool io_changed   = (inputs != s_last.inputs) || (outputs != s_last.outputs);
-    bool edge_changed = (gen    != s_last.edge_gen);
-    if (!io_changed && !edge_changed) return;
-
-    std::vector<int> edges_to_send = edge_changed ? edges : std::vector<int>{};
-    std::string msg = build_ws_msg(inputs, outputs, edges_to_send, counts);
+    std::string msg = build_ws_msg(inputs, outputs, edges, counts);
 
     for (struct mg_connection* c = mgr->conns; c != nullptr; c = c->next) {
         if (c->is_websocket) {
             mg_ws_send(c, msg.c_str(), msg.size(), WEBSOCKET_OP_TEXT);
         }
     }
-
-    s_last.inputs   = std::move(inputs);
-    s_last.outputs  = std::move(outputs);
-    s_last.edge_gen = gen;
 }
 
 // ── Mongoose event handler ────────────────────────────────────────────────────
@@ -399,7 +383,7 @@ static void server_loop(uint16_t port) {
 
     while (s_running.load()) {
         mg_mgr_poll(&mgr, 100);
-        push_if_changed(&mgr);
+        push_if_pending(&mgr);
     }
 
     mg_mgr_free(&mgr);

@@ -1,4 +1,5 @@
 #pragma once
+#include <atomic>
 #include <mutex>
 #include <unordered_map>
 #include <vector>
@@ -18,6 +19,7 @@ struct SharedState {
     std::vector<int>              configured_inputs;   // set once at startup
     std::vector<int>              configured_outputs;  // set once at startup
     bool                          remote_mode{false};  // true when using RemoteReader
+    std::atomic<bool>             push_pending{false}; // set by WsPublisher, cleared by Mongoose
 };
 
 extern SharedState g_state;
