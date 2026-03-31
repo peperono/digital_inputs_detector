@@ -389,8 +389,8 @@ static void server_loop(uint16_t port) {
     std::printf("[HttpServer] listening on %s\n", addr);
 
     while (s_running.load()) {
-        mg_mgr_poll(&mgr, 100);
-        push_if_pending(&mgr);
+        mg_mgr_poll(&mgr, 100);       // procesa red: acepta conexiones, HTTP request/response, WS recv
+        push_if_pending(&mgr);        // push WS saliente si WsPublisher activó push_pending
     }
 
     mg_mgr_free(&mgr);
