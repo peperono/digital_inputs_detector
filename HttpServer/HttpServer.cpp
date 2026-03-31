@@ -313,9 +313,16 @@ static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
             std::string body;
             {
                 std::lock_guard<std::mutex> lk(g_state.mtx);
-                body  = "{\"remote\":"  + std::string(g_state.remote_mode ? "true" : "false");
-                body += ",\"inputs\":"  + int_vec_to_json(g_state.configured_inputs);
-                body += ",\"outputs\":" + int_vec_to_json(g_state.configured_outputs) + "}";
+                body = "[";
+                for (std::size_t i = 0; i < g_state.configs.size(); ++i) {
+                    const auto& cfg = g_state.configs[i];
+                    if (i > 0) body += ",";
+                    body += "{\"id\":"               + std::to_string(cfg.id);
+                    body += ",\"logic_positive\":"   + std::string(cfg.logic_positive   ? "true" : "false");
+                    body += ",\"detection_always\":" + std::string(cfg.detection_always ? "true" : "false");
+                    body += ",\"linked_outputs\":"   + int_vec_to_json(cfg.linked_outputs) + "}";
+                }
+                body += "]";
             }
             mg_http_reply(c, 200, "Content-Type: application/json\r\n", "%s", body.c_str());
 

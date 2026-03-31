@@ -85,6 +85,7 @@ int main() {
             std::unique(g_state.configured_outputs.begin(), g_state.configured_outputs.end()),
             g_state.configured_outputs.end());
         g_state.remote_mode = (choice == 2);
+        g_state.configs     = configs;
     }
 
     // En modo remoto, inicializar g_remoteState con todos los IDs a false

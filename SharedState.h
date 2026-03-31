@@ -1,4 +1,5 @@
 #pragma once
+#include "DigitalEdgeDetector/DigitalEdgeDetector.h"
 #include <atomic>
 #include <mutex>
 #include <unordered_map>
@@ -20,6 +21,7 @@ struct SharedState {
     std::vector<int>              configured_outputs;  // set once at startup
     bool                          remote_mode{false};  // true when using RemoteReader
     std::atomic<bool>             push_pending{false}; // set by WsPublisher, cleared by Mongoose
+    std::vector<InputConfig>      configs;             // written at startup and on reconfigure
 };
 
 extern SharedState g_state;

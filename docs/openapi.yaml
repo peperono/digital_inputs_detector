@@ -1,0 +1,105 @@
+openapi: 3.0.3
+info:
+  title: Digital IO Edge Detector API
+  version: 1.0.0
+
+paths:
+  /config/inputs:
+    get:
+      summary: Lista todas las configuraciones de entrada
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InputConfig'
+
+    post:
+      summary: Añade una configuración de entrada
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputConfig'
+      responses:
+        '201':
+          description: Creado
+
+  /config/inputs/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+
+    get:
+      summary: Obtiene una configuración de entrada por ID
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InputConfig'
+        '404':
+          description: No encontrado
+
+    put:
+      summary: Actualiza una configuración de entrada
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputConfig'
+      responses:
+        '200':
+          description: Actualizado
+        '404':
+          description: No encontrado
+
+    delete:
+      summary: Elimina una configuración de entrada
+      responses:
+        '204':
+          description: Eliminado
+        '404':
+          description: No encontrado
+
+components:
+  schemas:
+    InputConfig:
+      type: object
+      required:
+        - id
+        - logic_positive
+        - detection_always
+        - linked_outputs
+      properties:
+        id:
+          type: integer
+          description: Identificador único de la entrada digital
+          example: 1
+        logic_positive:
+          type: boolean
+          description: >
+            true  → flanco de subida activa el pulso (false→true).
+            false → flanco de bajada activa el pulso (true→false).
+          example: true
+        detection_always:
+          type: boolean
+          description: >
+            true  → detección siempre activa.
+            false → detección activa solo cuando alguna salida enlazada está en ON.
+          example: false
+        linked_outputs:
+          type: array
+          description: IDs de salidas digitales que condicionan la detección cuando detection_always es false
+          items:
+            type: integer
+          example: [10, 11]
