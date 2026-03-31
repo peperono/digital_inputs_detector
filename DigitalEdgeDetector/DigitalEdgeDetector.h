@@ -1,6 +1,7 @@
 #pragma once
 #include "../qpcpp/include/qpcpp.hpp"
 #include "../signals.h"
+#include "InputConfig.h"
 #include <functional>
 #include <vector>
 #include <unordered_map>
@@ -9,13 +10,6 @@
 using IOReader = std::function<void(
     std::unordered_map<int, bool>& inputs,
     std::unordered_map<int, bool>& outputs)>;
-
-struct InputConfig {
-    int  id;
-    bool logic_positive;   // true  → rising edge (false→true) triggers pulse
-    bool detection_always; // true  → always active; false → only when a linked output is ON
-    std::vector<int> linked_outputs;
-};
 
 // ── DigitalEdgeDetector ───────────────────────────────────────────────────────
 // Active Object that periodically polls IO via an IOReader callback,

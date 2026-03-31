@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.6 Chrome/144.0.7559.236 Electron/40.8.4 Safari/537.36" version="29.6.6">
   <diagram name="Sistema" id="SistemaDiagram">
-    <mxGraphModel dx="1322" dy="558" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1400" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="1362" dy="582" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1400" pageHeight="827" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -52,7 +52,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="SYS-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="&lt;b&gt;SharedState&lt;/b&gt;&lt;div&gt;mutex&lt;/div&gt;&lt;div&gt;inputs / outputs&lt;/div&gt;&lt;div&gt;last_edges / edge_counts&lt;/div&gt;&lt;div&gt;push_pending&lt;/div&gt;" vertex="1">
+        <mxCell id="SYS-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="&lt;b&gt;SharedState&lt;/b&gt;&lt;div&gt;mutex&lt;/div&gt;&lt;div&gt;inputs / outputs&lt;/div&gt;&lt;div&gt;last_edges / edge_counts&lt;/div&gt;&lt;div&gt;configs: InputConfig[]&lt;/div&gt;&lt;div&gt;push_pending&lt;/div&gt;&lt;div&gt;remote_mode&lt;/div&gt;" vertex="1">
           <mxGeometry height="90" width="160" x="860" y="150" as="geometry" />
         </mxCell>
         <mxCell id="SYS-25" edge="1" parent="1" source="SYS-23" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;strokeColor=#d6b656;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="SYS-13" value="escribe estado&lt;div&gt;push_pending = true&lt;/div&gt;">
@@ -70,17 +70,37 @@
         <mxCell id="SYS-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" value="&lt;b&gt;HttpServer&lt;/b&gt;&lt;div&gt;thread Mongoose&lt;/div&gt;&lt;div&gt;:8080&lt;/div&gt;" vertex="1">
           <mxGeometry height="70" width="160" x="860" y="340" as="geometry" />
         </mxCell>
-        <mxCell id="SYS-15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=11;" value="&lt;b&gt;Browser&lt;/b&gt;&lt;div&gt;http://localhost:8080&lt;/div&gt;" vertex="1">
-          <mxGeometry height="70" width="150" x="1154" y="340" as="geometry" />
+        <mxCell id="SYS-15-WS" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#82b366;fontColor=#333333;fontSize=11;" value="&lt;b&gt;Browser&lt;/b&gt;&lt;div&gt;WebSocket /ws&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="150" x="1231" y="458" as="geometry" />
+        </mxCell>
+        <mxCell id="SYS-15-HTTP" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#b85450;fontColor=#333333;fontSize=11;" value="&lt;b&gt;Browser&lt;/b&gt;&lt;div&gt;HTTP REST&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="150" x="1243" y="235" as="geometry" />
         </mxCell>
         <mxCell id="SYS-17" edge="1" parent="1" source="SYS-13" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#d6b656;" target="SYS-14" value="push_pending flag">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="SYS-18" edge="1" parent="1" source="SYS-14" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=1;exitY=0.35;exitDx=0;exitDy=0;entryX=0;entryY=0.35;entryDx=0;entryDy=0;strokeColor=#82b366;" target="SYS-15" value="WebSocket push">
+        <mxCell id="SYS-18" edge="1" parent="1" source="SYS-14" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=1;exitY=0.4;exitDx=0;exitDy=0;entryX=0;entryY=0.4;entryDx=0;entryDy=0;strokeColor=#82b366;startArrow=block;startFill=0;endArrow=block;endFill=0;" target="SYS-15-WS" value="WebSocket&lt;div&gt;→ inputs/outputs/last_edges/edge_counts&lt;/div&gt;&lt;div&gt;← inputs/outputs&lt;/div&gt;">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="SYS-19" edge="1" parent="1" source="SYS-15" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=0;exitY=0.65;exitDx=0;exitDy=0;entryX=1;entryY=0.65;entryDx=0;entryDy=0;strokeColor=#82b366;" target="SYS-14" value="JSON por WebSocket">
+        <mxCell id="SYS-26" edge="1" parent="1" source="SYS-15-HTTP" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.2;entryDx=0;entryDy=0;strokeColor=#b85450;startArrow=block;startFill=0;endArrow=block;endFill=0;" target="SYS-14" value="GET: / , /state , /config&lt;div&gt;POST/PUT/DELETE: /config/{id}&lt;/div&gt;">
           <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="SYS-28" edge="1" parent="1" source="SYS-14" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.7;entryDx=0;entryDy=0;strokeColor=#b85450;endArrow=block;endFill=1;" target="SYS-3" value="RECONFIGURE_SIG&lt;div&gt;ReconfigureEvt (pool)&lt;/div&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="820" y="375" />
+              <mxPoint x="820" y="220" />
+              <mxPoint x="470" y="220" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="SYS-31" edge="1" parent="1" source="SYS-3" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;exitX=1;exitY=0.15;exitDx=0;exitDy=0;entryX=0;entryY=0.15;entryDx=0;entryDy=0;strokeColor=#d6b656;endArrow=block;endFill=1;" target="SYS-13" value="escribe configs">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="160" />
+              <mxPoint x="820" y="160" />
+            </Array>
+          </mxGeometry>
         </mxCell>
         <mxCell id="SYS-21" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" value="&lt;b&gt;g_remoteState&lt;/b&gt;&lt;div&gt;mutex&lt;/div&gt;&lt;div&gt;inputs / outputs&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="160" x="141" y="554" as="geometry" />

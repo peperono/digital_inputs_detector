@@ -72,18 +72,9 @@ int main() {
 
     edgeDetector.configure(configs);
 
-    // Inicializar SharedState con IDs configurados
+    // Inicializar SharedState
     {
         std::lock_guard<std::mutex> lk(g_state.mtx);
-        for (auto const& cfg : configs) {
-            g_state.configured_inputs.push_back(cfg.id);
-            for (int out : cfg.linked_outputs)
-                g_state.configured_outputs.push_back(out);
-        }
-        std::sort(g_state.configured_outputs.begin(), g_state.configured_outputs.end());
-        g_state.configured_outputs.erase(
-            std::unique(g_state.configured_outputs.begin(), g_state.configured_outputs.end()),
-            g_state.configured_outputs.end());
         g_state.remote_mode = (choice == 2);
         g_state.configs     = configs;
     }
@@ -101,6 +92,10 @@ int main() {
     QP::QF::init();
     QP::QActive::psInit(subscrSto, Q_DIM(subscrSto));
 
+    // Pool para ReconfigureEvt (arrays fijos, sin heap — compatible con QF::gc)
+    static std::uint8_t reconfigPool[4 * sizeof(ReconfigureEvt)];
+    QP::QF::poolInit(reconfigPool, sizeof(reconfigPool), sizeof(ReconfigureEvt));
+
     // Prioridad 4 → DigitalEdgeDetector (poll IO + publica eventos)
     // Prioridad 3 → Monitor             (imprime por consola)
     // Prioridad 2 → WsPublisher         (actualiza SharedState → push WebSocket)
@@ -112,7 +107,7 @@ int main() {
         testObserver.start(1U, testObserverQSto, Q_DIM(testObserverQSto), nullptr, 0U);
     }
 
-    HttpServer::start(8080);
+    HttpServer::start(8080, &edgeDetector);
 
     int ret = QP::QF::run();
 

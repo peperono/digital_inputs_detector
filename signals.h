@@ -1,5 +1,6 @@
 #pragma once
 #include "qpcpp/include/qpcpp.hpp"
+#include "DigitalEdgeDetector/InputConfig.h"
 #include <unordered_map>
 #include <vector>
 
@@ -10,6 +11,7 @@ enum Signals : QP::QSignal {
     IO_STATE_CHANGED_SIG = QP::Q_USER_SIG, // published by DigitalEdgeDetector
     EDGE_DETECTED_SIG,                      // published by DigitalEdgeDetector
     EDGE_DETECTOR_POLL_SIG,                 // internal time-event of DigitalEdgeDetector
+    RECONFIGURE_SIG,                        // posted by HttpServer to DigitalEdgeDetector
     MAX_SIG
 };
 
@@ -25,6 +27,24 @@ struct IOStateEvt : public QP::QEvt {
     explicit IOStateEvt() noexcept
         : QP::QEvt{IO_STATE_CHANGED_SIG}
     {}
+};
+
+// Posted by HttpServer to DigitalEdgeDetector when InputConfig changes.
+// Pool event with fixed-size arrays — no dynamic allocation, safe with QF::gc().
+struct ReconfigureEvt : public QP::QEvt {
+    static constexpr int MAX_CONFIGS = 16;
+    static constexpr int MAX_LINKED  = 8;
+
+    struct Entry {
+        int  id;
+        bool logic_positive;
+        bool detection_always;
+        int  linked_outputs[MAX_LINKED];
+        int  n_linked;
+    };
+
+    Entry entries[MAX_CONFIGS];
+    int   n_configs;
 };
 
 // Published by DigitalEdgeDetector when one or more configured edges fire

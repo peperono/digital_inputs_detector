@@ -1,6 +1,7 @@
 #include "HttpServer.h"
 #include "../SharedState.h"
 #include "../RemoteReader.hpp"
+#include "../signals.h"
 #include <thread>
 #include <atomic>
 #include <string>
@@ -291,6 +292,11 @@ static void push_if_pending(struct mg_mgr* mgr) {
 
 // ── Mongoose event handler ────────────────────────────────────────────────────
 
+static QP::QActive* s_edgeDetector = nullptr;
+
+static int  uri_tail_id(struct mg_str uri);
+static void post_reconfigure(const std::vector<InputConfig>& configs);
+
 static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
     if (ev == MG_EV_HTTP_MSG) {
         auto* hm = static_cast<struct mg_http_message*>(ev_data);
@@ -309,7 +315,8 @@ static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
             std::string msg = build_ws_msg(inputs, outputs, {}, counts);
             mg_ws_send(c, msg.c_str(), msg.size(), WEBSOCKET_OP_TEXT);
 
-        } else if (mg_match(hm->uri, mg_str("/config"), NULL)) {
+        } else if (mg_match(hm->uri, mg_str("/config"), NULL)
+                   && mg_match(hm->method, mg_str("GET"), NULL)) {
             std::string body;
             {
                 std::lock_guard<std::mutex> lk(g_state.mtx);
@@ -326,20 +333,67 @@ static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
             }
             mg_http_reply(c, 200, "Content-Type: application/json\r\n", "%s", body.c_str());
 
+        } else if (mg_match(hm->uri, mg_str("/config"), NULL)
+                   && mg_match(hm->method, mg_str("POST"), NULL)) {
+            // Parsear nueva InputConfig del body y añadirla
+            InputConfig cfg;
+            cfg.id = (int)mg_json_get_long(hm->body, "$.id", -1);
+            { bool v = false; mg_json_get_bool(hm->body, "$.logic_positive",   &v); cfg.logic_positive   = v; }
+            { bool v = false; mg_json_get_bool(hm->body, "$.detection_always", &v); cfg.detection_always = v; }
+            if (cfg.id < 0) { mg_http_reply(c, 400, "", "missing id\n"); return; }
+
+            std::vector<InputConfig> allConfigs;
+            {
+                std::lock_guard<std::mutex> lk(g_state.mtx);
+                allConfigs = g_state.configs;
+            }
+            allConfigs.push_back(cfg);
+            post_reconfigure(allConfigs);
+            mg_http_reply(c, 201, "Content-Type: application/json\r\n", "{}");
+
+        } else if (mg_match(hm->uri, mg_str("/config/*"), NULL)
+                   && mg_match(hm->method, mg_str("PUT"), NULL)) {
+            int id = uri_tail_id(hm->uri);
+            InputConfig cfg;
+            cfg.id = id;
+            { bool v = false; mg_json_get_bool(hm->body, "$.logic_positive",   &v); cfg.logic_positive   = v; }
+            { bool v = false; mg_json_get_bool(hm->body, "$.detection_always", &v); cfg.detection_always = v; }
+
+            std::vector<InputConfig> allConfigs;
+            {
+                std::lock_guard<std::mutex> lk(g_state.mtx);
+                allConfigs = g_state.configs;
+            }
+            bool found = false;
+            for (auto& c2 : allConfigs) {
+                if (c2.id == id) { c2 = cfg; found = true; break; }
+            }
+            if (!found) { mg_http_reply(c, 404, "", "not found\n"); return; }
+            post_reconfigure(allConfigs);
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{}");
+
+        } else if (mg_match(hm->uri, mg_str("/config/*"), NULL)
+                   && mg_match(hm->method, mg_str("DELETE"), NULL)) {
+            int id = uri_tail_id(hm->uri);
+            std::vector<InputConfig> allConfigs;
+            {
+                std::lock_guard<std::mutex> lk(g_state.mtx);
+                allConfigs = g_state.configs;
+            }
+            bool found = false;
+            for (auto it = allConfigs.begin(); it != allConfigs.end(); ++it) {
+                if (it->id == id) { allConfigs.erase(it); found = true; break; }
+            }
+            if (!found) { mg_http_reply(c, 404, "", "not found\n"); return; }
+            post_reconfigure(allConfigs);
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{}");
+
         } else if (mg_match(hm->uri, mg_str("/state"), NULL)) {
             std::string body;
             {
                 std::lock_guard<std::mutex> lk(g_state.mtx);
                 body  = "{\"inputs\":"  + bool_map_to_json(g_state.inputs);
                 body += ",\"outputs\":" + bool_map_to_json(g_state.outputs) + "}";
-            }
-            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "%s", body.c_str());
-
-        } else if (mg_match(hm->uri, mg_str("/edges"), NULL)) {
-            std::string body;
-            {
-                std::lock_guard<std::mutex> lk(g_state.mtx);
-                body = "{\"last_edges\":" + int_vec_to_json(g_state.last_edges) + "}";
             }
             mg_http_reply(c, 200, "Content-Type: application/json\r\n", "%s", body.c_str());
 
@@ -374,6 +428,33 @@ static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
     }
 }
 
+// ── Helpers para CRUD /config ─────────────────────────────────────────────────
+
+static int uri_tail_id(struct mg_str uri) {
+    const char* p = uri.buf + uri.len;
+    while (p > uri.buf && *(p-1) != '/') --p;
+    return std::atoi(p);
+}
+
+static void post_reconfigure(const std::vector<InputConfig>& configs) {
+    if (!s_edgeDetector) return;
+    auto* evt = Q_NEW(ReconfigureEvt, RECONFIGURE_SIG);
+    evt->n_configs = 0;
+    for (const auto& cfg : configs) {
+        if (evt->n_configs >= ReconfigureEvt::MAX_CONFIGS) break;
+        auto& e          = evt->entries[evt->n_configs++];
+        e.id               = cfg.id;
+        e.logic_positive   = cfg.logic_positive;
+        e.detection_always = cfg.detection_always;
+        e.n_linked = 0;
+        for (int out : cfg.linked_outputs) {
+            if (e.n_linked < ReconfigureEvt::MAX_LINKED)
+                e.linked_outputs[e.n_linked++] = out;
+        }
+    }
+    s_edgeDetector->post_(evt, nullptr);
+}
+
 // ── Server thread ─────────────────────────────────────────────────────────────
 
 static std::atomic<bool> s_running{false};
@@ -398,7 +479,8 @@ static void server_loop(uint16_t port) {
 
 // ── Public API ────────────────────────────────────────────────────────────────
 
-void HttpServer::start(uint16_t port) {
+void HttpServer::start(uint16_t port, QP::QActive* edgeDetector) {
+    s_edgeDetector = edgeDetector;
     s_running = true;
     s_thread  = std::thread(server_loop, port);
 }

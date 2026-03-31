@@ -1,4 +1,6 @@
 #include "DigitalEdgeDetector.h"
+#include "../SharedState.h"
+#include <mutex>
 
 // ── Constructor ───────────────────────────────────────────────────────────────
 
@@ -79,6 +81,28 @@ Q_STATE_DEF(DigitalEdgeDetector, operating) {
                 }
             }
 
+            status = Q_HANDLED();
+            break;
+        }
+
+        case RECONFIGURE_SIG: {
+            auto const* evt = Q_EVT_CAST(ReconfigureEvt);
+            std::vector<InputConfig> newConfigs;
+            for (int i = 0; i < evt->n_configs; ++i) {
+                auto const& e = evt->entries[i];
+                InputConfig cfg;
+                cfg.id               = e.id;
+                cfg.logic_positive   = e.logic_positive;
+                cfg.detection_always = e.detection_always;
+                for (int j = 0; j < e.n_linked; ++j)
+                    cfg.linked_outputs.push_back(e.linked_outputs[j]);
+                newConfigs.push_back(std::move(cfg));
+            }
+            configure(newConfigs);
+            {
+                std::lock_guard<std::mutex> lk(g_state.mtx);
+                g_state.configs = m_configs;
+            }
             status = Q_HANDLED();
             break;
         }
