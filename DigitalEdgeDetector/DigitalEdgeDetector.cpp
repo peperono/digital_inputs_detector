@@ -116,10 +116,30 @@ Q_STATE_DEF(DigitalEdgeDetector, operating) {
                 newConfigs.push_back(std::move(cfg));
             }
             configure(newConfigs);
+            // Reset IO tracking so next poll emits IO_STATE_CHANGED_SIG
+            m_prevInputs.clear();
+            m_prevOutputs.clear();
+            if (m_remoteMode) {
+                m_remoteInputs.clear();
+                m_remoteOutputs.clear();
+                for (const auto& cfg : m_configs) {
+                    m_remoteInputs[cfg.id] = false;
+                    for (int out_id : cfg.linked_outputs)
+                        m_remoteOutputs[out_id] = false;
+                }
+            }
             {
                 std::lock_guard<std::mutex> lk(g_state.mtx);
                 g_state.configs = m_configs;
+                g_state.inputs.clear();
+                g_state.outputs.clear();
+                for (const auto& cfg : m_configs) {
+                    g_state.inputs[cfg.id] = false;
+                    for (int out_id : cfg.linked_outputs)
+                        g_state.outputs[out_id] = false;
+                }
             }
+            g_state.push_pending.store(true);
             status = Q_HANDLED();
             break;
         }

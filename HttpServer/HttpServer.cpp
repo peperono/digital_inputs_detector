@@ -170,6 +170,10 @@ static const char* s_html = R"html(<!DOCTYPE html>
     }
 
     function initControls(inputs, outputs) {
+      ctrlInputs.innerHTML  = '';
+      ctrlOutputs.innerHTML = '';
+      controlState.inputs  = {};
+      controlState.outputs = {};
       Object.keys(inputs).sort((a,b)  => Number(a)-Number(b))
         .forEach(id => makeToggle(ctrlInputs,  'Entrada', Number(id), controlState.inputs));
       Object.keys(outputs).sort((a,b) => Number(a)-Number(b))
@@ -193,9 +197,13 @@ static const char* s_html = R"html(<!DOCTYPE html>
       ws.onerror = () => ws.close();
       ws.onmessage = ({ data }) => {
         const d = JSON.parse(data);
-        if (!controlsReady && d.inputs && Object.keys(d.inputs).length > 0) {
-          initControls(d.inputs, d.outputs || {});
-          controlsReady = true;
+        if (d.inputs && Object.keys(d.inputs).length > 0) {
+          const newIds = Object.keys(d.inputs).sort().join(',');
+          const curIds = Object.keys(controlState.inputs).sort().join(',');
+          if (!controlsReady || newIds !== curIds) {
+            initControls(d.inputs, d.outputs || {});
+            controlsReady = true;
+          }
         }
         if (d.inputs)  updateInputsTable(d.inputs, d.edge_counts || {});
         if (d.outputs) updateOutputsTable(d.outputs);
