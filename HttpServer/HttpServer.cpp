@@ -1,6 +1,5 @@
 #include "HttpServer.h"
 #include "../SharedState.h"
-#include "../RemoteReader.hpp"
 #include "../signals.h"
 #include <thread>
 #include <atomic>
@@ -48,6 +47,15 @@ static const char* s_html = R"html(<!DOCTYPE html>
               font-size: 13px; margin: 4px; color: #c9d1d9; }
     .toggle.on  { background: #1a4a2a; color: #3fb950; border-color: #3fb950; }
     .toggle.off { background: #3a1a1a; color: #f85149; border-color: #f85149; }
+    #cfg-editor { width: 420px; height: 180px; background: #161b22; color: #c9d1d9;
+                  border: 1px solid #30363d; font-family: 'Courier New', monospace;
+                  font-size: 12px; padding: 8px; resize: vertical; display: block;
+                  margin-bottom: 8px; }
+    .cfg-btn { padding: 6px 18px; cursor: pointer; border: 1px solid #30363d;
+               background: #161b22; font-family: 'Courier New', monospace;
+               font-size: 13px; margin-right: 8px; color: #c9d1d9; }
+    .cfg-btn:hover { border-color: #58a6ff; color: #58a6ff; }
+    #cfg-status { font-size: 12px; }
   </style>
 </head>
 <body>
@@ -69,16 +77,27 @@ static const char* s_html = R"html(<!DOCTYPE html>
     <ul id="edges-log"></ul>
   </div>
 
-  <div id="ctrl-section">
-    <hr>
-    <h2>Control remoto</h2>
-    <div class="ctrl-group">
-      <div class="ctrl-label">Entradas</div>
-      <div id="ctrl-inputs"></div>
+  <hr>
+  <div style="display:flex;gap:48px;align-items:flex-start;">
+    <div id="ctrl-section">
+      <h2>Control remoto</h2>
+      <div class="ctrl-group">
+        <div class="ctrl-label">Entradas</div>
+        <div id="ctrl-inputs"></div>
+      </div>
+      <div class="ctrl-group">
+        <div class="ctrl-label">Salidas</div>
+        <div id="ctrl-outputs"></div>
+      </div>
     </div>
-    <div class="ctrl-group">
-      <div class="ctrl-label">Salidas</div>
-      <div id="ctrl-outputs"></div>
+    <div>
+      <h2>Configuración de entradas</h2>
+      <textarea id="cfg-editor" spellcheck="false"></textarea>
+      <div>
+        <button id="btn-cargar"  class="cfg-btn" onclick="loadConfig()">Cargar</button>
+        <button id="btn-aplicar" class="cfg-btn" onclick="applyConfig()">Aplicar</button>
+        <span id="cfg-status"></span>
+      </div>
     </div>
   </div>
 
@@ -164,6 +183,7 @@ static const char* s_html = R"html(<!DOCTYPE html>
       ws.onopen  = () => {
         statusEl.textContent = '\u25CF Conectado';
         statusEl.className   = 'ok';
+        loadConfig();
       };
       ws.onclose = () => {
         ws = null;
@@ -182,6 +202,63 @@ static const char* s_html = R"html(<!DOCTYPE html>
         if (d.outputs) updateOutputsTable(d.outputs);
         if (d.last_edges && d.last_edges.length > 0) addEdgeEntry(d.last_edges);
       };
+    }
+
+    const cfgEditor  = document.getElementById('cfg-editor');
+    const cfgStatus  = document.getElementById('cfg-status');
+
+    const btnCargar  = document.getElementById('btn-cargar');
+    const btnAplicar = document.getElementById('btn-aplicar');
+
+    function setBusy(btn, label) {
+      if (!btn) return;
+      btn.textContent = label;
+      btn.style.borderColor = '#d2a679';
+      btn.style.color       = '#d2a679';
+      btn.disabled = true;
+    }
+    function setIdle(btn, label) {
+      if (!btn) return;
+      btn.textContent = label;
+      btn.style.borderColor = '';
+      btn.style.color       = '';
+      btn.disabled = false;
+    }
+    function fetchWithTimeout(url, opts, ms) {
+      const ctrl = new AbortController();
+      const tid  = setTimeout(() => ctrl.abort(), ms);
+      return fetch(url, { ...opts, signal: ctrl.signal })
+        .finally(() => clearTimeout(tid));
+    }
+
+    function loadConfig() {
+      setBusy(btnCargar, 'Cargando...');
+      fetchWithTimeout('/config', {}, 5000)
+        .then(r => r.json())
+        .then(d => {
+          cfgEditor.value = JSON.stringify(d, null, 2);
+          cfgStatus.textContent = 'Cargado';
+          cfgStatus.className = 'ok';
+        })
+        .catch(() => { cfgStatus.textContent = 'Error al cargar'; cfgStatus.className = 'err'; })
+        .finally(() => setIdle(btnCargar, 'Cargar'));
+    }
+
+    function applyConfig() {
+      let parsed;
+      try { parsed = JSON.parse(cfgEditor.value); } catch(e) {
+        cfgStatus.textContent = 'JSON inválido'; cfgStatus.className = 'err'; return;
+      }
+      setBusy(btnAplicar, 'Aplicando...');
+      fetchWithTimeout('/config', { method: 'PUT',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(parsed) }, 5000)
+        .then(r => {
+          cfgStatus.textContent = r.ok ? 'Aplicado' : 'Error ' + r.status;
+          cfgStatus.className = r.ok ? 'ok' : 'err';
+        })
+        .catch(() => { cfgStatus.textContent = 'Error de red'; cfgStatus.className = 'err'; })
+        .finally(() => setIdle(btnAplicar, 'Aplicar'));
     }
 
     connect();
@@ -334,6 +411,29 @@ static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
             mg_http_reply(c, 200, "Content-Type: application/json\r\n", "%s", body.c_str());
 
         } else if (mg_match(hm->uri, mg_str("/config"), NULL)
+                   && mg_match(hm->method, mg_str("PUT"), NULL)) {
+            // Reemplazar toda la configuración con el array recibido
+            std::vector<InputConfig> allConfigs;
+            for (int i = 0; i < ReconfigureEvt::MAX_CONFIGS; ++i) {
+                char arrpath[16];
+                std::snprintf(arrpath, sizeof(arrpath), "$[%d]", i);
+                int elen = 0;
+                int eoff = mg_json_get(hm->body, arrpath, &elen);
+                if (eoff < 0) break;
+                struct mg_str elem = { hm->body.buf + eoff, (size_t)elen };
+                long id = mg_json_get_long(elem, "$.id", -1);
+                if (id < 0) break;
+                InputConfig cfg;
+                cfg.id = (int)id;
+                { bool v = false; mg_json_get_bool(elem, "$.logic_positive",   &v); cfg.logic_positive   = v; }
+                { bool v = false; mg_json_get_bool(elem, "$.detection_always", &v); cfg.detection_always = v; }
+                allConfigs.push_back(cfg);
+            }
+            if (allConfigs.empty()) { mg_http_reply(c, 400, "", "empty or invalid array\n"); return; }
+            post_reconfigure(allConfigs);
+            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{}");
+
+        } else if (mg_match(hm->uri, mg_str("/config"), NULL)
                    && mg_match(hm->method, mg_str("POST"), NULL)) {
             // Parsear nueva InputConfig del body y añadirla
             InputConfig cfg;
@@ -408,7 +508,7 @@ static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
         }
 
     } else if (ev == MG_EV_WS_MSG) {
-        // Mensaje entrante del browser → actualizar g_remoteState
+        // Mensaje entrante del browser → postear REMOTE_INPUT_SIG al AO
         auto* wm = static_cast<struct mg_ws_message*>(ev_data);
         if ((wm->flags & 0xF) != WEBSOCKET_OP_TEXT) return;
 
@@ -420,10 +520,17 @@ static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
         if (ioff > 0) parse_bool_object({wm->data.buf + ioff, (size_t)ilen}, inputs);
         if (ooff > 0) parse_bool_object({wm->data.buf + ooff, (size_t)olen}, outputs);
 
-        if (!inputs.empty() || !outputs.empty()) {
-            std::lock_guard<std::mutex> lk(g_remoteState.mtx);
-            if (!inputs.empty())  g_remoteState.inputs  = std::move(inputs);
-            if (!outputs.empty()) g_remoteState.outputs = std::move(outputs);
+        if ((!inputs.empty() || !outputs.empty()) && s_edgeDetector) {
+            auto* evt    = Q_NEW(RemoteInputEvt, REMOTE_INPUT_SIG);
+            evt->n_inputs  = 0;
+            evt->n_outputs = 0;
+            for (auto const& [id, v] : inputs)
+                if (evt->n_inputs  < RemoteInputEvt::MAX_IOS)
+                    evt->inputs[evt->n_inputs++]   = {id, v};
+            for (auto const& [id, v] : outputs)
+                if (evt->n_outputs < RemoteInputEvt::MAX_IOS)
+                    evt->outputs[evt->n_outputs++] = {id, v};
+            s_edgeDetector->post_(evt, nullptr);
         }
     }
 }

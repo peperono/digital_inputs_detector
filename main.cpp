@@ -6,13 +6,11 @@
 #include "HttpServer/WsPublisher.h"
 #include "SharedState.h"
 #include "TestIOReader.hpp"
-#include "RemoteReader.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 
-SharedState       g_state;
-RemoteReaderState g_remoteState;
+SharedState g_state;
 
 // ── QP assertion handler (requerido por el framework) ─────────────────────────
 extern "C" Q_NORETURN Q_onError(char const * const module, int_t const id) {
@@ -62,7 +60,7 @@ int main() {
         InputConfig{2, /*logic_positive=*/true, /*always=*/false, {10} }
     };
 
-    IOReader reader = (choice == 2) ? makeRemoteReader() : makeTestReader();
+    IOReader reader = (choice == 2) ? IOReader{} : makeTestReader();
 
     // ── Active object instances ───────────────────────────────────────────────
     static DigitalEdgeDetector edgeDetector{ std::move(reader), 10U };
@@ -71,28 +69,29 @@ int main() {
     static TestObserver        testObserver;
 
     edgeDetector.configure(configs);
+    edgeDetector.setRemoteMode(choice == 2);
 
     // Inicializar SharedState
     {
         std::lock_guard<std::mutex> lk(g_state.mtx);
         g_state.remote_mode = (choice == 2);
         g_state.configs     = configs;
-    }
-
-    // En modo remoto, inicializar g_remoteState con todos los IDs a false
-    if (choice == 2) {
-        std::lock_guard<std::mutex> lk(g_remoteState.mtx);
-        for (auto const& cfg : configs) {
-            g_remoteState.inputs[cfg.id] = false;
-            for (int out : cfg.linked_outputs)
-                g_remoteState.outputs[out] = false;
+        // Pre-populate inputs/outputs so the browser sees the IO structure
+        // on the very first WebSocket message (before the first poll event).
+        for (const auto& cfg : configs) {
+            g_state.inputs[cfg.id] = false;
+            for (int out_id : cfg.linked_outputs)
+                g_state.outputs[out_id] = false;
         }
     }
 
     QP::QF::init();
     QP::QActive::psInit(subscrSto, Q_DIM(subscrSto));
 
-    // Pool para ReconfigureEvt (arrays fijos, sin heap — compatible con QF::gc)
+    // Pool para RemoteInputEvt y ReconfigureEvt — orden creciente de tamaño obligatorio en QP
+    static std::uint8_t remoteInputPool[8 * sizeof(RemoteInputEvt)];
+    QP::QF::poolInit(remoteInputPool, sizeof(remoteInputPool), sizeof(RemoteInputEvt));
+
     static std::uint8_t reconfigPool[4 * sizeof(ReconfigureEvt)];
     QP::QF::poolInit(reconfigPool, sizeof(reconfigPool), sizeof(ReconfigureEvt));
 

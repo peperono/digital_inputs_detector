@@ -8,6 +8,7 @@
 //   GET  /                        → HTML monitor page
 //   GET  /state                   → JSON with current inputs and outputs
 //   GET  /config                  → JSON array of all InputConfigs
+//   PUT  /config                  → replace full InputConfig array, reconfigure detector
 //   POST /config                  → add InputConfig, reconfigure detector
 //   PUT  /config/{id}             → replace InputConfig, reconfigure detector
 //   DELETE /config/{id}           → remove InputConfig, reconfigure detector

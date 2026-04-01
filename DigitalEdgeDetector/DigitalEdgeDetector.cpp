@@ -44,7 +44,12 @@ Q_STATE_DEF(DigitalEdgeDetector, operating) {
         case EDGE_DETECTOR_POLL_SIG: {
             std::unordered_map<int, bool> inputs;
             std::unordered_map<int, bool> outputs;
-            m_reader(inputs, outputs);
+            if (m_remoteMode) {
+                inputs  = m_remoteInputs;
+                outputs = m_remoteOutputs;
+            } else {
+                m_reader(inputs, outputs);
+            }
 
             if ((inputs != m_prevInputs) || (outputs != m_prevOutputs)) {
                 m_prevInputs  = inputs;
@@ -81,6 +86,18 @@ Q_STATE_DEF(DigitalEdgeDetector, operating) {
                 }
             }
 
+            status = Q_HANDLED();
+            break;
+        }
+
+        case REMOTE_INPUT_SIG: {
+            auto const* evt = Q_EVT_CAST(RemoteInputEvt);
+            m_remoteInputs.clear();
+            m_remoteOutputs.clear();
+            for (int i = 0; i < evt->n_inputs;  ++i)
+                m_remoteInputs[evt->inputs[i].id]   = evt->inputs[i].value;
+            for (int i = 0; i < evt->n_outputs; ++i)
+                m_remoteOutputs[evt->outputs[i].id] = evt->outputs[i].value;
             status = Q_HANDLED();
             break;
         }

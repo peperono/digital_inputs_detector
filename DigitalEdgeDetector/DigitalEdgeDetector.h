@@ -20,6 +20,7 @@ public:
 
     // Must be called before starting the AO.
     void configure(const std::vector<InputConfig>& configs);
+    void setRemoteMode(bool remote) noexcept { m_remoteMode = remote; }
 
 private:
     QP::QTimeEvt  m_pollTimer;
@@ -30,6 +31,9 @@ private:
     std::unordered_map<int, bool> m_prevStates;
     std::unordered_map<int, bool> m_prevInputs;
     std::unordered_map<int, bool> m_prevOutputs;
+    bool                          m_remoteMode{false};
+    std::unordered_map<int, bool> m_remoteInputs;
+    std::unordered_map<int, bool> m_remoteOutputs;
     IOStateEvt                    m_ioEvt;
     EdgeDetectedEvt               m_edgeEvt;
 

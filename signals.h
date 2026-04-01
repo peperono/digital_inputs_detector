@@ -12,6 +12,7 @@ enum Signals : QP::QSignal {
     EDGE_DETECTED_SIG,                      // published by DigitalEdgeDetector
     EDGE_DETECTOR_POLL_SIG,                 // internal time-event of DigitalEdgeDetector
     RECONFIGURE_SIG,                        // posted by HttpServer to DigitalEdgeDetector
+    REMOTE_INPUT_SIG,                       // posted by HttpServer to DigitalEdgeDetector (WS input)
     MAX_SIG
 };
 
@@ -45,6 +46,15 @@ struct ReconfigureEvt : public QP::QEvt {
 
     Entry entries[MAX_CONFIGS];
     int   n_configs;
+};
+
+// Posted by HttpServer to DigitalEdgeDetector when the browser sends IO state via WS.
+// Pool event with fixed-size arrays — no dynamic allocation, safe with QF::gc().
+struct RemoteInputEvt : public QP::QEvt {
+    static constexpr int MAX_IOS = 16;
+    struct Entry { int id; bool value; };
+    Entry inputs[MAX_IOS];  int n_inputs;
+    Entry outputs[MAX_IOS]; int n_outputs;
 };
 
 // Published by DigitalEdgeDetector when one or more configured edges fire
