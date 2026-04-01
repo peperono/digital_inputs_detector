@@ -183,7 +183,6 @@ static const char* s_html = R"html(<!DOCTYPE html>
       ws.onopen  = () => {
         statusEl.textContent = '\u25CF Conectado';
         statusEl.className   = 'ok';
-        loadConfig();
       };
       ws.onclose = () => {
         ws = null;
@@ -261,6 +260,7 @@ static const char* s_html = R"html(<!DOCTYPE html>
         .finally(() => setIdle(btnAplicar, 'Aplicar'));
     }
 
+    loadConfig();
     connect();
   </script>
 </body>
