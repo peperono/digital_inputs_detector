@@ -104,6 +104,7 @@ static const char* s_html = R"html(<!DOCTYPE html>
   <script>
     let ws = null;
     let controlsReady = false;
+    let expectedInputIds = null;   // set after PUT /config; gates stale WS reinit
     const controlState = { inputs: {}, outputs: {} };
 
     const statusEl    = document.getElementById('status');
@@ -200,9 +201,14 @@ static const char* s_html = R"html(<!DOCTYPE html>
         if (d.inputs && Object.keys(d.inputs).length > 0) {
           const newIds = Object.keys(d.inputs).sort().join(',');
           const curIds = Object.keys(controlState.inputs).sort().join(',');
-          if (!controlsReady || newIds !== curIds) {
+          // After PUT /config we set expectedInputIds; skip WS reinit until WS
+          // catches up to the new config (avoids stale poll overwriting new buttons).
+          const wsMatchesExpected = (expectedInputIds === null || newIds === expectedInputIds);
+          if (!controlsReady || (newIds !== curIds && wsMatchesExpected)) {
             initControls(d.inputs, d.outputs || {});
             controlsReady = true;
+            if (expectedInputIds !== null && newIds === expectedInputIds)
+              expectedInputIds = null;
           }
         }
         if (d.inputs)  updateInputsTable(d.inputs, d.edge_counts || {});
@@ -269,6 +275,7 @@ static const char* s_html = R"html(<!DOCTYPE html>
               ni[c.id] = false;
               (c.linked_outputs || []).forEach(o => { no[o] = false; });
             });
+            expectedInputIds = Object.keys(ni).sort().join(',');
             initControls(ni, no);
             controlsReady = true;
           }
