@@ -194,8 +194,8 @@ static const char* s_html = R"html(<!DOCTYPE html>
       ws.onerror = () => ws.close();
       ws.onmessage = ({ data }) => {
         const d = JSON.parse(data);
-        if (!controlsReady && d.inputs && d.outputs) {
-          initControls(d.inputs, d.outputs);
+        if (!controlsReady && d.inputs && Object.keys(d.inputs).length > 0) {
+          initControls(d.inputs, d.outputs || {});
           controlsReady = true;
         }
         if (d.inputs)  updateInputsTable(d.inputs, d.edge_counts || {});
