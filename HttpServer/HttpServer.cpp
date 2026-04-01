@@ -263,7 +263,15 @@ static const char* s_html = R"html(<!DOCTYPE html>
         .then(r => {
           cfgStatus.textContent = r.ok ? 'Aplicado' : 'Error ' + r.status;
           cfgStatus.className = r.ok ? 'ok' : 'err';
-          if (r.ok) controlsReady = false;
+          if (r.ok) {
+            const ni = {}, no = {};
+            parsed.forEach(c => {
+              ni[c.id] = false;
+              (c.linked_outputs || []).forEach(o => { no[o] = false; });
+            });
+            initControls(ni, no);
+            controlsReady = true;
+          }
         })
         .catch(() => { cfgStatus.textContent = 'Error de red'; cfgStatus.className = 'err'; })
         .finally(() => setIdle(btnAplicar, 'Aplicar'));
