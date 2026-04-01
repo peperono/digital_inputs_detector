@@ -263,6 +263,7 @@ static const char* s_html = R"html(<!DOCTYPE html>
         .then(r => {
           cfgStatus.textContent = r.ok ? 'Aplicado' : 'Error ' + r.status;
           cfgStatus.className = r.ok ? 'ok' : 'err';
+          if (r.ok) controlsReady = false;
         })
         .catch(() => { cfgStatus.textContent = 'Error de red'; cfgStatus.className = 'err'; })
         .finally(() => setIdle(btnAplicar, 'Aplicar'));
@@ -435,6 +436,19 @@ static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
                 cfg.id = (int)id;
                 { bool v = false; mg_json_get_bool(elem, "$.logic_positive",   &v); cfg.logic_positive   = v; }
                 { bool v = false; mg_json_get_bool(elem, "$.detection_always", &v); cfg.detection_always = v; }
+                { int llen = 0;
+                  int loff = mg_json_get(elem, "$.linked_outputs", &llen);
+                  if (loff >= 0) {
+                      struct mg_str linked = { elem.buf + loff, (size_t)llen };
+                      for (int k = 0; k < ReconfigureEvt::MAX_LINKED; ++k) {
+                          char kpath[8];
+                          std::snprintf(kpath, sizeof(kpath), "$[%d]", k);
+                          long out_id = mg_json_get_long(linked, kpath, -1);
+                          if (out_id < 0) break;
+                          cfg.linked_outputs.push_back((int)out_id);
+                      }
+                  }
+                }
                 allConfigs.push_back(cfg);
             }
             if (allConfigs.empty()) { mg_http_reply(c, 400, "", "empty or invalid array\n"); return; }
