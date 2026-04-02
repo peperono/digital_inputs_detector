@@ -395,7 +395,6 @@ static void push_if_pending(struct mg_mgr* mgr) {
 
 static QP::QActive* s_edgeDetector = nullptr;
 
-static int  uri_tail_id(struct mg_str uri);
 static void post_reconfigure(const std::vector<InputConfig>& configs);
 
 static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
@@ -470,70 +469,6 @@ static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
             post_reconfigure(allConfigs);
             mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{}");
 
-        } else if (mg_match(hm->uri, mg_str("/config"), NULL)
-                   && mg_match(hm->method, mg_str("POST"), NULL)) {
-            // Parsear nueva InputConfig del body y añadirla
-            InputConfig cfg;
-            cfg.id = (int)mg_json_get_long(hm->body, "$.id", -1);
-            { bool v = false; mg_json_get_bool(hm->body, "$.logic_positive",   &v); cfg.logic_positive   = v; }
-            { bool v = false; mg_json_get_bool(hm->body, "$.detection_always", &v); cfg.detection_always = v; }
-            if (cfg.id < 0) { mg_http_reply(c, 400, "", "missing id\n"); return; }
-
-            std::vector<InputConfig> allConfigs;
-            {
-                std::lock_guard<std::mutex> lk(g_state.mtx);
-                allConfigs = g_state.configs;
-            }
-            allConfigs.push_back(cfg);
-            post_reconfigure(allConfigs);
-            mg_http_reply(c, 201, "Content-Type: application/json\r\n", "{}");
-
-        } else if (mg_match(hm->uri, mg_str("/config/*"), NULL)
-                   && mg_match(hm->method, mg_str("PUT"), NULL)) {
-            int id = uri_tail_id(hm->uri);
-            InputConfig cfg;
-            cfg.id = id;
-            { bool v = false; mg_json_get_bool(hm->body, "$.logic_positive",   &v); cfg.logic_positive   = v; }
-            { bool v = false; mg_json_get_bool(hm->body, "$.detection_always", &v); cfg.detection_always = v; }
-
-            std::vector<InputConfig> allConfigs;
-            {
-                std::lock_guard<std::mutex> lk(g_state.mtx);
-                allConfigs = g_state.configs;
-            }
-            bool found = false;
-            for (auto& c2 : allConfigs) {
-                if (c2.id == id) { c2 = cfg; found = true; break; }
-            }
-            if (!found) { mg_http_reply(c, 404, "", "not found\n"); return; }
-            post_reconfigure(allConfigs);
-            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{}");
-
-        } else if (mg_match(hm->uri, mg_str("/config/*"), NULL)
-                   && mg_match(hm->method, mg_str("DELETE"), NULL)) {
-            int id = uri_tail_id(hm->uri);
-            std::vector<InputConfig> allConfigs;
-            {
-                std::lock_guard<std::mutex> lk(g_state.mtx);
-                allConfigs = g_state.configs;
-            }
-            bool found = false;
-            for (auto it = allConfigs.begin(); it != allConfigs.end(); ++it) {
-                if (it->id == id) { allConfigs.erase(it); found = true; break; }
-            }
-            if (!found) { mg_http_reply(c, 404, "", "not found\n"); return; }
-            post_reconfigure(allConfigs);
-            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "{}");
-
-        } else if (mg_match(hm->uri, mg_str("/state"), NULL)) {
-            std::string body;
-            {
-                std::lock_guard<std::mutex> lk(g_state.mtx);
-                body  = "{\"inputs\":"  + bool_map_to_json(g_state.inputs);
-                body += ",\"outputs\":" + bool_map_to_json(g_state.outputs) + "}";
-            }
-            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "%s", body.c_str());
-
         } else if (mg_match(hm->uri, mg_str("/"), NULL)) {
             // Servir HTML sin pasar por printf (evita interpretar % del CSS)
             mg_printf(c, "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nCache-Control: no-cache\r\nContent-Length: %u\r\n\r\n",
@@ -572,13 +507,7 @@ static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
     }
 }
 
-// ── Helpers para CRUD /config ─────────────────────────────────────────────────
-
-static int uri_tail_id(struct mg_str uri) {
-    const char* p = uri.buf + uri.len;
-    while (p > uri.buf && *(p-1) != '/') --p;
-    return std::atoi(p);
-}
+// ── Helper para PUT /config ──────────────────────────────────────────────────
 
 static void post_reconfigure(const std::vector<InputConfig>& configs) {
     if (!s_edgeDetector) return;
