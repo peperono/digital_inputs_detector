@@ -21,4 +21,4 @@ struct SharedState {
     std::vector<InputConfig>      configs;             // written at startup and on reconfigure
 };
 
-extern SharedState g_state;
+extern SharedState se;

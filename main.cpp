@@ -10,7 +10,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-SharedState g_state;
+SharedState se;
 
 // ── QP assertion handler (requerido por el framework) ─────────────────────────
 extern "C" Q_NORETURN Q_onError(char const * const module, int_t const id) {
@@ -73,15 +73,15 @@ int main() {
 
     // Inicializar SharedState
     {
-        std::lock_guard<std::mutex> lk(g_state.mtx);
-        g_state.remote_mode = (choice == 2);
-        g_state.configs     = configs;
+        std::lock_guard<std::mutex> lk(se.mtx);
+        se.remote_mode = (choice == 2);
+        se.configs     = configs;
         // Pre-populate inputs/outputs so the browser sees the IO structure
         // on the very first WebSocket message (before the first poll event).
         for (const auto& cfg : configs) {
-            g_state.inputs[cfg.id] = false;
+            se.inputs[cfg.id] = false;
             for (int out_id : cfg.linked_outputs)
-                g_state.outputs[out_id] = false;
+                se.outputs[out_id] = false;
         }
     }
 

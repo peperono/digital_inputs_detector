@@ -32,11 +32,11 @@ Q_STATE_DEF(WsPublisher, running) {
         case IO_STATE_CHANGED_SIG: {
             auto const* evt = Q_EVT_CAST(IOStateEvt);
             {
-                std::lock_guard<std::mutex> lk(g_state.mtx);
-                g_state.inputs  = evt->inputs;
-                g_state.outputs = evt->outputs;
+                std::lock_guard<std::mutex> lk(se.mtx);
+                se.inputs  = evt->inputs;
+                se.outputs = evt->outputs;
             }
-            g_state.push_pending.store(true);
+            se.push_pending.store(true);
             status = Q_HANDLED();
             break;
         }
@@ -44,13 +44,13 @@ Q_STATE_DEF(WsPublisher, running) {
         case EDGE_DETECTED_SIG: {
             auto const* evt = Q_EVT_CAST(EdgeDetectedEvt);
             {
-                std::lock_guard<std::mutex> lk(g_state.mtx);
-                g_state.last_edges = evt->input_ids;
+                std::lock_guard<std::mutex> lk(se.mtx);
+                se.last_edges = evt->input_ids;
                 for (int id : evt->input_ids) {
-                    ++g_state.edge_counts[id];
+                    ++se.edge_counts[id];
                 }
             }
-            g_state.push_pending.store(true);
+            se.push_pending.store(true);
             status = Q_HANDLED();
             break;
         }

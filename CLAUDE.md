@@ -33,7 +33,7 @@ Output: `build/app.exe`. The script compiles `mongoose/mongoose.c` with `gcc` th
 | 2 | `WsPublisher` | — | `IO_STATE_CHANGED_SIG`, `EDGE_DETECTED_SIG` |
 | 1 | `TestObserver` | — | both (test mode only) |
 
-**Cross-thread data:** `SharedState g_state` (defined in `main.cpp`, declared `extern` in `SharedState.h`) is the only shared data between the QV thread and the Mongoose thread. All access is guarded by `g_state.mtx`. When `WsPublisher` updates `g_state`, it sets `g_state.push_pending = true` to signal the Mongoose thread to push a WebSocket message.
+**Cross-thread data:** `SharedState se` (defined in `main.cpp`, declared `extern` in `SharedState.h`) is the only shared data between the QV thread and the Mongoose thread. All access is guarded by `se.mtx`. When `WsPublisher` updates `se`, it sets `se.push_pending = true` to signal the Mongoose thread to push a WebSocket message.
 
 **IOReader injection:** `DigitalEdgeDetector` accepts an `IOReader = std::function<void(map<int,bool>&, map<int,bool>&)>` at construction. In test mode `makeTestReader()` returns a lambda cycling through `TestStep` scenarios. In remote mode the reader is empty (`IOReader{}`) and state comes from `REMOTE_INPUT_SIG` events published by the Mongoose thread.
 

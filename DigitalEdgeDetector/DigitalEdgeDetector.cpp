@@ -129,19 +129,19 @@ Q_STATE_DEF(DigitalEdgeDetector, operating) {
                 }
             }
             {
-                std::lock_guard<std::mutex> lk(g_state.mtx);
-                g_state.configs = m_configs;
-                g_state.inputs.clear();
-                g_state.outputs.clear();
-                g_state.edge_counts.clear();
-                g_state.last_edges.clear();
+                std::lock_guard<std::mutex> lk(se.mtx);
+                se.configs = m_configs;
+                se.inputs.clear();
+                se.outputs.clear();
+                se.edge_counts.clear();
+                se.last_edges.clear();
                 for (const auto& cfg : m_configs) {
-                    g_state.inputs[cfg.id] = false;
+                    se.inputs[cfg.id] = false;
                     for (int out_id : cfg.linked_outputs)
-                        g_state.outputs[out_id] = false;
+                        se.outputs[out_id] = false;
                 }
             }
-            g_state.push_pending.store(true);
+            se.push_pending.store(true);
             status = Q_HANDLED();
             break;
         }

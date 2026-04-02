@@ -247,7 +247,7 @@ static const char* s_html = R"html(<!DOCTYPE html>
 
     function loadConfig() {
       setBusy(btnCargar, 'Carregant...');
-      fetchWithTimeout('/config', {}, 5000)
+      fetchWithTimeout('/configs', {}, 5000)
         .then(r => r.json())
         .then(d => {
           cfgEditor.value = JSON.stringify(d, null, 2);
@@ -264,7 +264,7 @@ static const char* s_html = R"html(<!DOCTYPE html>
         cfgStatus.textContent = 'JSON no vàlid'; cfgStatus.className = 'err'; return;
       }
       setBusy(btnAplicar, 'Aplicant...');
-      fetchWithTimeout('/config', { method: 'PUT',
+      fetchWithTimeout('/configs', { method: 'PUT',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify(parsed) }, 5000)
         .then(r => {
@@ -368,18 +368,18 @@ static void parse_bool_object(struct mg_str s, std::unordered_map<int, bool>& re
 // ── push_pending → push WebSocket ────────────────────────────────────────────
 
 static void push_if_pending(struct mg_mgr* mgr) {
-    if (!g_state.push_pending.load()) return;
-    g_state.push_pending.store(false);
+    if (!se.push_pending.load()) return;
+    se.push_pending.store(false);
 
     std::unordered_map<int, bool> inputs, outputs;
     std::unordered_map<int, int>  counts;
     std::vector<int>              edges;
     {
-        std::lock_guard<std::mutex> lk(g_state.mtx);
-        inputs  = g_state.inputs;
-        outputs = g_state.outputs;
-        edges   = g_state.last_edges;
-        counts  = g_state.edge_counts;
+        std::lock_guard<std::mutex> lk(se.mtx);
+        inputs  = se.inputs;
+        outputs = se.outputs;
+        edges   = se.last_edges;
+        counts  = se.edge_counts;
     }
 
     std::string msg = build_ws_msg(inputs, outputs, edges, counts);
@@ -407,22 +407,22 @@ static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
             std::unordered_map<int, bool> inputs, outputs;
             std::unordered_map<int, int>  counts;
             {
-                std::lock_guard<std::mutex> lk(g_state.mtx);
-                inputs  = g_state.inputs;
-                outputs = g_state.outputs;
-                counts  = g_state.edge_counts;
+                std::lock_guard<std::mutex> lk(se.mtx);
+                inputs  = se.inputs;
+                outputs = se.outputs;
+                counts  = se.edge_counts;
             }
             std::string msg = build_ws_msg(inputs, outputs, {}, counts);
             mg_ws_send(c, msg.c_str(), msg.size(), WEBSOCKET_OP_TEXT);
 
-        } else if (mg_match(hm->uri, mg_str("/config"), NULL)
+        } else if (mg_match(hm->uri, mg_str("/configs"), NULL)
                    && mg_match(hm->method, mg_str("GET"), NULL)) {
             std::string body;
             {
-                std::lock_guard<std::mutex> lk(g_state.mtx);
+                std::lock_guard<std::mutex> lk(se.mtx);
                 body = "[";
-                for (std::size_t i = 0; i < g_state.configs.size(); ++i) {
-                    const auto& cfg = g_state.configs[i];
+                for (std::size_t i = 0; i < se.configs.size(); ++i) {
+                    const auto& cfg = se.configs[i];
                     if (i > 0) body += ",";
                     body += "{\"id\":"               + std::to_string(cfg.id);
                     body += ",\"logic_positive\":"   + std::string(cfg.logic_positive   ? "true" : "false");
@@ -433,7 +433,7 @@ static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
             }
             mg_http_reply(c, 200, "Content-Type: application/json\r\n", "%s", body.c_str());
 
-        } else if (mg_match(hm->uri, mg_str("/config"), NULL)
+        } else if (mg_match(hm->uri, mg_str("/configs"), NULL)
                    && mg_match(hm->method, mg_str("PUT"), NULL)) {
             // Reemplazar toda la configuración con el array recibido
             std::vector<InputConfig> allConfigs;
