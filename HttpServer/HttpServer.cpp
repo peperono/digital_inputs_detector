@@ -14,7 +14,7 @@ extern "C" {
 // ── HTML embebido ─────────────────────────────────────────────────────────────
 
 static const char* s_html = R"html(<!DOCTYPE html>
-<html lang="es">
+<html lang="ca">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -44,7 +44,7 @@ static const char* s_html = R"html(<!DOCTYPE html>
                   letter-spacing: 1px; margin-bottom: 6px; }
     .toggle { padding: 8px 20px; cursor: pointer; border: 1px solid #30363d;
               background: #161b22; font-family: 'Courier New', monospace;
-              font-size: 13px; margin: 4px; color: #c9d1d9; }
+              font-size: 13px; margin: 4px; color: #c9d1d9; border-radius: 20px; }
     .toggle.on  { background: #1a4a2a; color: #3fb950; border-color: #3fb950; }
     .toggle.off { background: #3a1a1a; color: #f85149; border-color: #f85149; }
     #cfg-editor { width: 420px; height: 180px; background: #161b22; color: #c9d1d9;
@@ -60,41 +60,41 @@ static const char* s_html = R"html(<!DOCTYPE html>
 </head>
 <body>
   <h1>Digital IO Monitor</h1>
-  <div id="status" class="err">&#9679; Desconectado</div>
+  <div id="status" class="err">&#9679; Desconnectat</div>
 
   <div class="section">
-    <h2>Entradas</h2>
-    <table id="tbl-inputs"><tr><th>ID</th><th>Estado</th><th>Flancos</th></tr></table>
+    <h2>Entrades</h2>
+    <table id="tbl-inputs"><tr><th>ID</th><th>Estat</th><th>Flancs</th></tr></table>
   </div>
 
   <div class="section">
-    <h2>Salidas</h2>
-    <table id="tbl-outputs"><tr><th>ID</th><th>Estado</th></tr></table>
+    <h2>Sortides</h2>
+    <table id="tbl-outputs"><tr><th>ID</th><th>Estat</th></tr></table>
   </div>
 
   <div class="section">
-    <h2>Flancos detectados</h2>
+    <h2>Flancs detectats</h2>
     <ul id="edges-log"></ul>
   </div>
 
   <hr>
   <div style="display:flex;gap:48px;align-items:flex-start;">
     <div id="ctrl-section">
-      <h2>Control remoto</h2>
+      <h2>Control remot</h2>
       <div class="ctrl-group">
-        <div class="ctrl-label">Entradas</div>
+        <div class="ctrl-label">Entrades</div>
         <div id="ctrl-inputs"></div>
       </div>
       <div class="ctrl-group">
-        <div class="ctrl-label">Salidas</div>
+        <div class="ctrl-label">Sortides</div>
         <div id="ctrl-outputs"></div>
       </div>
     </div>
     <div>
-      <h2>Configuración de entradas</h2>
+      <h2>Configuració d'entrades</h2>
       <textarea id="cfg-editor" spellcheck="false"></textarea>
       <div>
-        <button id="btn-cargar"  class="cfg-btn" onclick="loadConfig()">Cargar</button>
+        <button id="btn-cargar"  class="cfg-btn" onclick="loadConfig()">Carregar</button>
         <button id="btn-aplicar" class="cfg-btn" onclick="applyConfig()">Aplicar</button>
         <span id="cfg-status"></span>
       </div>
@@ -145,7 +145,7 @@ static const char* s_html = R"html(<!DOCTYPE html>
     function addEdgeEntry(edges) {
       const ts = new Date().toLocaleTimeString();
       const li = document.createElement('li');
-      li.textContent = ts + ' \u2014 entrada(s): ' + edges.join(', ');
+      li.textContent = ts + ' \u2014 entrada/es: ' + edges.join(', ');
       edgesLog.insertBefore(li, edgesLog.firstChild);
     }
 
@@ -178,7 +178,7 @@ static const char* s_html = R"html(<!DOCTYPE html>
       Object.keys(inputs).sort((a,b)  => Number(a)-Number(b))
         .forEach(id => makeToggle(ctrlInputs,  'Entrada', Number(id), controlState.inputs));
       Object.keys(outputs).sort((a,b) => Number(a)-Number(b))
-        .forEach(id => makeToggle(ctrlOutputs, 'Salida',  Number(id), controlState.outputs));
+        .forEach(id => makeToggle(ctrlOutputs, 'Sortida', Number(id), controlState.outputs));
       ctrlSection.style.display = 'block';
       sendControl();
     }
@@ -186,12 +186,13 @@ static const char* s_html = R"html(<!DOCTYPE html>
     function connect() {
       ws = new WebSocket('ws://' + location.host + '/ws');
       ws.onopen  = () => {
-        statusEl.textContent = '\u25CF Conectado';
+        statusEl.textContent = '\u25CF Connectat';
         statusEl.className   = 'ok';
+        loadConfig();
       };
       ws.onclose = () => {
         ws = null;
-        statusEl.textContent = '\u25CF Desconectado \u2014 reintentando...';
+        statusEl.textContent = '\u25CF Desconnectat \u2014 reintentant...';
         statusEl.className   = 'err';
         setTimeout(connect, 2000);
       };
@@ -245,29 +246,29 @@ static const char* s_html = R"html(<!DOCTYPE html>
     }
 
     function loadConfig() {
-      setBusy(btnCargar, 'Cargando...');
+      setBusy(btnCargar, 'Carregant...');
       fetchWithTimeout('/config', {}, 5000)
         .then(r => r.json())
         .then(d => {
           cfgEditor.value = JSON.stringify(d, null, 2);
-          cfgStatus.textContent = 'Cargado';
+          cfgStatus.textContent = 'Carregat';
           cfgStatus.className = 'ok';
         })
-        .catch(() => { cfgStatus.textContent = 'Error al cargar'; cfgStatus.className = 'err'; })
-        .finally(() => setIdle(btnCargar, 'Cargar'));
+        .catch(() => { cfgStatus.textContent = 'Error en carregar'; cfgStatus.className = 'err'; })
+        .finally(() => setIdle(btnCargar, 'Carregar'));
     }
 
     function applyConfig() {
       let parsed;
       try { parsed = JSON.parse(cfgEditor.value); } catch(e) {
-        cfgStatus.textContent = 'JSON inválido'; cfgStatus.className = 'err'; return;
+        cfgStatus.textContent = 'JSON no vàlid'; cfgStatus.className = 'err'; return;
       }
-      setBusy(btnAplicar, 'Aplicando...');
+      setBusy(btnAplicar, 'Aplicant...');
       fetchWithTimeout('/config', { method: 'PUT',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify(parsed) }, 5000)
         .then(r => {
-          cfgStatus.textContent = r.ok ? 'Aplicado' : 'Error ' + r.status;
+          cfgStatus.textContent = r.ok ? 'Aplicat' : 'Error ' + r.status;
           cfgStatus.className = r.ok ? 'ok' : 'err';
           if (r.ok) {
             const ni = {}, no = {};
@@ -280,11 +281,10 @@ static const char* s_html = R"html(<!DOCTYPE html>
             controlsReady = true;
           }
         })
-        .catch(() => { cfgStatus.textContent = 'Error de red'; cfgStatus.className = 'err'; })
+        .catch(() => { cfgStatus.textContent = 'Error de xarxa'; cfgStatus.className = 'err'; })
         .finally(() => setIdle(btnAplicar, 'Aplicar'));
     }
 
-    loadConfig();
     connect();
   </script>
 </body>
