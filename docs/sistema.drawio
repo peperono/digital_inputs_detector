@@ -1,16 +1,16 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.6 Chrome/144.0.7559.236 Electron/40.8.4 Safari/537.36" version="29.6.6">
   <diagram name="Sistema" id="SistemaDiagram">
-    <mxGraphModel dx="1701" dy="1187" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1400" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="1564" dy="1104" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1400" pageHeight="827" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="SYS-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;&lt;i&gt;IOReader&lt;/i&gt;&lt;/b&gt;&lt;div&gt;{abstract}&lt;/div&gt;" vertex="1">
+        <mxCell id="SYS-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;gradientColor=#7ea6e0;" value="&lt;b&gt;&lt;i&gt;IOReader&lt;/i&gt;&lt;/b&gt;&lt;div&gt;{abstract}&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="150" x="104" y="70" as="geometry" />
         </mxCell>
-        <mxCell id="SYS-1A" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;IOReader_ESP32&lt;/b&gt;&lt;div&gt;llegeix GPIO hardware&lt;/div&gt;" vertex="1">
+        <mxCell id="SYS-1A" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;gradientColor=#7ea6e0;" value="&lt;b&gt;IOReader_ESP32&lt;/b&gt;&lt;div&gt;llegeix GPIO hardware&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="160" x="-130" y="10" as="geometry" />
         </mxCell>
-        <mxCell id="SYS-1B" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;IOReader_Win32&lt;/b&gt;&lt;div&gt;simula entrades/sortides&lt;/div&gt;" vertex="1">
+        <mxCell id="SYS-1B" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;gradientColor=#7ea6e0;" value="&lt;b&gt;IOReader_Win32&lt;/b&gt;&lt;div&gt;simula entrades/sortides&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="160" x="-130" y="130" as="geometry" />
         </mxCell>
         <mxCell id="SYS-1C" edge="1" parent="1" source="SYS-1A" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#333333;endArrow=block;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" target="SYS-1" value="">
@@ -24,16 +24,16 @@
         <mxCell id="SYS-1D" edge="1" parent="1" source="SYS-1B" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#333333;endArrow=block;endFill=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" target="SYS-1" value="">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="SYS-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;DigitalEdgeDetector&lt;/b&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;&lt;div&gt;reader: IOReader&lt;/div&gt;&lt;div&gt;poll_ticks: uint32_t&lt;/div&gt;&lt;div&gt;configs: InputConfig[]&lt;/div&gt;" vertex="1">
+        <mxCell id="SYS-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;gradientColor=#7ea6e0;" value="&lt;b&gt;DigitalEdgeDetector&lt;/b&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;&lt;div&gt;reader: IOReader&lt;/div&gt;&lt;div&gt;poll_ticks: uint32_t&lt;/div&gt;&lt;div&gt;configs: InputConfig[]&lt;/div&gt;" vertex="1">
           <mxGeometry height="100" width="180" x="410" y="50" as="geometry" />
         </mxCell>
-        <mxCell id="SYS-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;&lt;i&gt;Monitor&lt;/i&gt;&lt;/b&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;&lt;div&gt;{abstract}&lt;/div&gt;" vertex="1">
+        <mxCell id="SYS-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;gradientColor=#7ea6e0;" value="&lt;b&gt;&lt;i&gt;Monitor&lt;/i&gt;&lt;/b&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;&lt;div&gt;{abstract}&lt;/div&gt;" vertex="1">
           <mxGeometry height="80" width="150" x="750" y="60" as="geometry" />
         </mxCell>
-        <mxCell id="SYS-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;Monitor_Win32&lt;/b&gt;&lt;div&gt;imprime mensaje&lt;/div&gt;" vertex="1">
+        <mxCell id="SYS-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;gradientColor=#7ea6e0;" value="&lt;b&gt;Monitor_Win32&lt;/b&gt;&lt;div&gt;imprime mensaje&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="150" x="680" y="200" as="geometry" />
         </mxCell>
-        <mxCell id="SYS-11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;Monitor_ESP32&lt;/b&gt;&lt;div&gt;activa salida digital&lt;/div&gt;" vertex="1">
+        <mxCell id="SYS-11" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;gradientColor=#7ea6e0;" value="&lt;b&gt;Monitor_ESP32&lt;/b&gt;&lt;div&gt;activa salida digital&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="150" x="850" y="200" as="geometry" />
         </mxCell>
         <mxCell id="SYS-10" edge="1" parent="1" source="SYS-9" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#333333;endArrow=block;endFill=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.2;entryY=1;entryDx=0;entryDy=0;" target="SYS-4" value="">
@@ -59,10 +59,10 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="SYS-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=11;" value="&lt;b&gt;SharedState se&lt;/b&gt;&lt;div&gt;se.mtx&lt;/div&gt;&lt;div&gt;se.inputs&lt;/div&gt;&lt;div&gt;se.outputs&lt;/div&gt;&lt;div&gt;se.last_edges&lt;/div&gt;&lt;div&gt;se.edge_counts&lt;/div&gt;&lt;div&gt;se.remote_mode&lt;/div&gt;&lt;div&gt;se.push_pending&lt;/div&gt;&lt;div&gt;se.configs&lt;/div&gt;" vertex="1">
+        <mxCell id="SYS-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;gradientColor=#ffd966;" value="&lt;b&gt;SharedState se&lt;/b&gt;&lt;div&gt;se.mtx&lt;/div&gt;&lt;div&gt;se.inputs&lt;/div&gt;&lt;div&gt;se.outputs&lt;/div&gt;&lt;div&gt;se.last_edges&lt;/div&gt;&lt;div&gt;se.edge_counts&lt;/div&gt;&lt;div&gt;se.remote_mode&lt;/div&gt;&lt;div&gt;se.push_pending&lt;/div&gt;&lt;div&gt;se.configs&lt;/div&gt;" vertex="1">
           <mxGeometry height="147" width="160" x="420" y="210" as="geometry" />
         </mxCell>
-        <mxCell id="SYS-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;fontSize=11;" value="&lt;b&gt;HttpServer&lt;/b&gt;&lt;div&gt;thread Mongoose&lt;/div&gt;&lt;div&gt;:8080&lt;/div&gt;" vertex="1">
+        <mxCell id="SYS-14" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;gradientColor=#ffd966;" value="&lt;b&gt;HttpServer&lt;/b&gt;&lt;div&gt;thread Mongoose&lt;/div&gt;&lt;div&gt;:8080&lt;/div&gt;" vertex="1">
           <mxGeometry height="70" width="160" x="420" y="420" as="geometry" />
         </mxCell>
         <mxCell id="SYS-15-WS" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontColor=#333333;fontSize=11;" value="&lt;b&gt;Browser&lt;/b&gt;&lt;div&gt;WebSocket /ws&lt;/div&gt;" vertex="1">
@@ -100,7 +100,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="LEG-0" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9e6;strokeColor=#d4c98a;fontSize=10;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;" value="&lt;div&gt;&lt;b&gt;Colors de nodes:&lt;/b&gt;&lt;/div&gt;&lt;div&gt;Blau — fil QV (cooperatiu)&lt;/div&gt;&lt;div&gt;Gris — fil Mongoose / dades compartides&lt;/div&gt;&lt;div&gt;Blanc — procés extern (browser)&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;Fletxes:&lt;/b&gt;&lt;/div&gt;&lt;div&gt;─── blava — crida directa / escriptura&lt;/div&gt;&lt;div&gt;- - - grisa — event QP (pub/sub o post)&lt;/div&gt;&lt;div&gt;──▷ buida — herència&lt;/div&gt;" vertex="1">
+        <mxCell id="LEG-0" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=10;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;fillColor=#f5f5f5;gradientColor=#b3b3b3;strokeColor=#666666;" value="&lt;div&gt;&lt;b&gt;Colors de nodes:&lt;/b&gt;&lt;/div&gt;&lt;div&gt;Blau — fil QV (cooperatiu)&lt;/div&gt;&lt;div&gt;Gris — fil Mongoose / dades compartides&lt;/div&gt;&lt;div&gt;Blanc — procés extern (browser)&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;Fletxes:&lt;/b&gt;&lt;/div&gt;&lt;div&gt;─── blava — crida directa / escriptura&lt;/div&gt;&lt;div&gt;- - - grisa — event QP (pub/sub o post)&lt;/div&gt;&lt;div&gt;──▷ buida — herència&lt;/div&gt;" vertex="1">
           <mxGeometry height="190" width="250" x="-130" y="300" as="geometry" />
         </mxCell>
       </root>
