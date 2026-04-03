@@ -1,5 +1,5 @@
 #pragma once
-#include "DigitalEdgeDetector/DigitalEdgeDetector.h"
+#include "DigitalEdgeDetector/InputConfig.h"
 #include <atomic>
 #include <mutex>
 #include <unordered_map>
