@@ -84,6 +84,19 @@ Q_STATE_DEF(DigitalEdgeDetector, operating) {
                 if (!m_edgeEvt.input_ids.empty()) {
                     PUBLISH(&m_edgeEvt, this);
                 }
+
+                // Escriure directament a SharedState (abans ho feia WsPublisher)
+                {
+                    std::lock_guard<std::mutex> lk(se.mtx);
+                    se.inputs  = inputs;
+                    se.outputs = outputs;
+                    if (!m_edgeEvt.input_ids.empty()) {
+                        se.last_edges = m_edgeEvt.input_ids;
+                        for (int id : m_edgeEvt.input_ids)
+                            ++se.edge_counts[id];
+                    }
+                }
+                se.push_pending.store(true);
             }
 
             status = Q_HANDLED();

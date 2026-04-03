@@ -3,7 +3,6 @@
 #include "DigitalEdgeDetector/DigitalEdgeDetector.h"
 #include "Monitor/Monitor.h"
 #include "HttpServer/HttpServer.h"
-#include "HttpServer/WsPublisher.h"
 #include "SharedState.h"
 #include "TestIOReader.hpp"
 #include <algorithm>
@@ -25,8 +24,6 @@ static QP::QSubscrList subscrSto[MAX_SIG];
 static QP::QEvtPtr edgeDetectorQSto[10];
 static QP::QEvtPtr controlQSto[10];
 static QP::QEvtPtr testObserverQSto[10];
-static QP::QEvtPtr wsPublisherQSto[10];
-
 // ── Callbacks requeridos por el port win32-qv ─────────────────────────────────
 namespace QP {
 namespace QF {
@@ -65,7 +62,6 @@ int main() {
     // ── Active object instances ───────────────────────────────────────────────
     static DigitalEdgeDetector edgeDetector{ std::move(reader), 10U };
     static Monitor             monitor;
-    static WsPublisher         wsPublisher;
     static TestObserver        testObserver;
 
     edgeDetector.configure(configs);
@@ -95,13 +91,11 @@ int main() {
     static std::uint8_t reconfigPool[4 * sizeof(ReconfigureEvt)];
     QP::QF::poolInit(reconfigPool, sizeof(reconfigPool), sizeof(ReconfigureEvt));
 
-    // Prioridad 4 → DigitalEdgeDetector (poll IO + publica eventos)
-    // Prioridad 3 → Monitor             (imprime por consola)
-    // Prioridad 2 → WsPublisher         (actualiza SharedState → push WebSocket)
+    // Prioridad 3 → DigitalEdgeDetector (poll IO + publica eventos + escriu SharedState)
+    // Prioridad 2 → Monitor             (imprime por consola)
     // Prioridad 1 → TestObserver        (observa eventos para verificación, solo en modo test)
-    edgeDetector.start(4U, edgeDetectorQSto, Q_DIM(edgeDetectorQSto), nullptr, 0U);
-    monitor.start(     3U, controlQSto,      Q_DIM(controlQSto),      nullptr, 0U);
-    wsPublisher.start( 2U, wsPublisherQSto,  Q_DIM(wsPublisherQSto),  nullptr, 0U);
+    edgeDetector.start(3U, edgeDetectorQSto, Q_DIM(edgeDetectorQSto), nullptr, 0U);
+    monitor.start(     2U, controlQSto,      Q_DIM(controlQSto),      nullptr, 0U);
     if (choice != 2) {
         testObserver.start(1U, testObserverQSto, Q_DIM(testObserverQSto), nullptr, 0U);
     }

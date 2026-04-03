@@ -263,6 +263,9 @@ static const char* s_html = R"html(<!DOCTYPE html>
       try { parsed = JSON.parse(cfgEditor.value); } catch(e) {
         cfgStatus.textContent = 'JSON no vàlid'; cfgStatus.className = 'err'; return;
       }
+      if (!Array.isArray(parsed) || parsed.length > 16) {
+        cfgStatus.textContent = 'Màxim 16 entrades'; cfgStatus.className = 'err'; return;
+      }
       setBusy(btnAplicar, 'Aplicant...');
       fetchWithTimeout('/configs', { method: 'PUT',
                                     headers: { 'Content-Type': 'application/json' },
