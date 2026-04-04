@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Digital IO Monitor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0d1117; color: #c9d1d9; padding: 16px 24px; }
+
+    /* ── Capçalera ── */
+    header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 12px; }
+    h1 { color: #58a6ff; font-size: 20px; }
+    #status { font-size: 12px; }
+    .ok  { color: #3fb950; }
+    .err { color: #f85149; }
+
+    /* ── Seccions de monitor ── */
+    .monitor-row { display: flex; gap: 32px; align-items: flex-start; margin-bottom: 14px; flex-wrap: wrap; }
+    .section-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #8b949e; margin-bottom: 8px; border-bottom: 1px solid #21262d; padding-bottom: 4px;
+    }
+
+    /* ── IO cards ── */
+    .io-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .io-card {
+      background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+      padding: 6px 10px; min-width: 72px; text-align: center;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .io-card.on  { border-color: #3fb950; box-shadow: 0 0 6px rgba(63,185,80,0.25); }
+    .io-card.off { border-color: #30363d; }
+    .io-card .io-id {
+      font-size: 11px; font-weight: 700; color: #58a6ff;
+      font-family: 'Courier New', monospace; margin-bottom: 3px;
+    }
+    .io-card .io-icon { margin: 2px 0; }
+    .io-card .io-icon svg { width: 34px; height: 22px; }
+    .io-card .io-label { font-size: 10px; font-weight: 600; margin-top: 2px; letter-spacing: 0.5px; }
+    .io-card .io-label.on  { color: #3fb950; }
+    .io-card .io-label.off { color: #6e7681; }
+    .io-card .io-edges { font-size: 9px; color: #8b949e; margin-top: 2px; }
+
+    /* ── Flancs log ── */
+    #edges-log {
+      background: #161b22; border: 1px solid #30363d; border-radius: 6px;
+      padding: 8px 12px; max-height: 120px; overflow-y: auto;
+      font-size: 11px; list-style: none; font-family: 'Courier New', monospace;
+      display: inline-block; min-width: 180px;
+    }
+    #edges-log li { padding: 2px 0; border-bottom: 1px solid #21262d; color: #d2a679; }
+    #edges-log li:last-child { border-bottom: none; }
+    #edges-log:empty::before { content: 'Cap flanc'; color: #484f58; font-style: italic; }
+
+    /* ── Divisor ── */
+    hr { border: none; border-top: 1px solid #21262d; margin: 12px 0; }
+
+    /* ── Fila inferior ── */
+    .bottom-row { display: flex; gap: 32px; align-items: flex-start; flex-wrap: wrap; }
+
+    /* ── Control remot ── */
+    #ctrl-section { display: none; }
+    .ctrl-group { margin-bottom: 10px; }
+    .toggle {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; cursor: pointer;
+      border: 2px solid #30363d; border-radius: 8px;
+      background: #161b22; font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 13px; font-weight: 600; margin: 3px; color: #6e7681;
+      transition: all 0.15s; box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .toggle .toggle-id {
+      font-family: 'Courier New', monospace; font-size: 14px; font-weight: 700; color: #58a6ff;
+    }
+    .toggle .toggle-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: #30363d; flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .toggle:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.4); border-color: #484f58; }
+    .toggle:active { transform: translateY(0); }
+    .toggle.on {
+      background: #0d2318; color: #3fb950; border-color: #3fb950;
+      box-shadow: 0 2px 8px rgba(63,185,80,0.3);
+    }
+    .toggle.on .toggle-dot { background: #3fb950; box-shadow: 0 0 6px rgba(63,185,80,0.6); }
+    .toggle.off {
+      background: #161b22; color: #6e7681; border-color: #30363d;
+    }
+
+    /* ── Config editor ── */
+    #cfg-editor { width: 520px; height: 280px; background: #161b22; color: #c9d1d9;
+                  border: 1px solid #30363d; border-radius: 6px;
+                  font-family: 'Courier New', monospace;
+                  font-size: 12px; padding: 8px; resize: vertical; display: block;
+                  margin-bottom: 8px; }
+    .cfg-btn { padding: 6px 18px; cursor: pointer; border: 1px solid #30363d;
+               background: #161b22; font-family: 'Segoe UI', system-ui, sans-serif;
+               font-size: 13px; margin-right: 8px; color: #c9d1d9; border-radius: 6px;
+               transition: all 0.15s; }
+    .cfg-btn:hover { border-color: #58a6ff; color: #58a6ff; }
+    #cfg-status { font-size: 12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Digital IO Monitor</h1>
+    <div id="status" class="err">&#9679; Desconnectat</div>
+  </header>
+
+  <div class="monitor-row">
+    <div class="io-section">
+      <div class="section-title">Entrades</div>
+      <div class="io-grid" id="grid-inputs"></div>
+    </div>
+    <div class="io-section">
+      <div class="section-title">Sortides</div>
+      <div class="io-grid" id="grid-outputs"></div>
+    </div>
+    <div class="io-section">
+      <div class="section-title">Flancs detectats</div>
+      <ul id="edges-log"></ul>
+    </div>
+  </div>
+
+  <hr>
+  <div class="bottom-row">
+    <div id="ctrl-section">
+      <div class="section-title">Control remot</div>
+      <div class="ctrl-group">
+        <div style="font-size:10px;color:#484f58;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">Entrades</div>
+        <div id="ctrl-inputs"></div>
+      </div>
+      <div class="ctrl-group">
+        <div style="font-size:10px;color:#484f58;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;">Sortides</div>
+        <div id="ctrl-outputs"></div>
+      </div>
+    </div>
+    <div>
+      <div class="section-title">Configuraci&oacute; d'entrades</div>
+      <textarea id="cfg-editor" spellcheck="false"></textarea>
+      <div>
+        <button id="btn-cargar"  class="cfg-btn" onclick="loadConfig()">Carregar</button>
+        <button id="btn-aplicar" class="cfg-btn" onclick="applyConfig()">Aplicar</button>
+        <span id="cfg-status"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── SVG switch icons ──
+    const SVG_CLOSED = `<svg viewBox="0 0 48 32" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="8" cy="24" r="4" fill="none" stroke="#3fb950" stroke-width="2"/>
+      <circle cx="40" cy="24" r="4" fill="none" stroke="#3fb950" stroke-width="2"/>
+      <line x1="12" y1="24" x2="36" y2="24" stroke="#3fb950" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>`;
+    const SVG_OPEN = `<svg viewBox="0 0 48 32" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="8" cy="24" r="4" fill="none" stroke="#484f58" stroke-width="2"/>
+      <circle cx="40" cy="24" r="4" fill="none" stroke="#484f58" stroke-width="2"/>
+      <line x1="12" y1="24" x2="34" y2="8" stroke="#484f58" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>`;
+
+    let ws = null;
+    let controlsReady = false;
+    let expectedInputIds = null;
+    const controlState = { inputs: {}, outputs: {} };
+
+    const statusEl    = document.getElementById('status');
+    const gridInputs  = document.getElementById('grid-inputs');
+    const gridOutputs = document.getElementById('grid-outputs');
+    const edgesLog    = document.getElementById('edges-log');
+    const ctrlSection = document.getElementById('ctrl-section');
+    const ctrlInputs  = document.getElementById('ctrl-inputs');
+    const ctrlOutputs = document.getElementById('ctrl-outputs');
+
+    function renderIOCards(container, items, counts) {
+      const sorted = Object.entries(items).sort(([a],[b]) => Number(a)-Number(b));
+      const isInput = counts !== undefined;
+      if (container.children.length !== sorted.length) {
+        container.innerHTML = '';
+        sorted.forEach(([id, state]) => {
+          const card = document.createElement('div');
+          card.className = 'io-card ' + (state ? 'on' : 'off');
+          card.dataset.ioId = id;
+          card.innerHTML =
+            '<div class="io-id">' + (isInput ? 'E' : 'S') + id + '</div>' +
+            '<div class="io-icon">' + (state ? SVG_CLOSED : SVG_OPEN) + '</div>' +
+            '<div class="io-label ' + (state ? 'on' : 'off') + '">' + (state ? 'TANCAT' : 'OBERT') + '</div>' +
+            (isInput ? '<div class="io-edges">\u25b2 ' + (counts[id] ?? 0) + '</div>' : '');
+          container.appendChild(card);
+        });
+      } else {
+        sorted.forEach(([id, state], i) => {
+          const card = container.children[i];
+          card.className = 'io-card ' + (state ? 'on' : 'off');
+          card.querySelector('.io-icon').innerHTML = state ? SVG_CLOSED : SVG_OPEN;
+          const lbl = card.querySelector('.io-label');
+          lbl.textContent = state ? 'TANCAT' : 'OBERT';
+          lbl.className = 'io-label ' + (state ? 'on' : 'off');
+          const edgesEl = card.querySelector('.io-edges');
+          if (edgesEl && counts) edgesEl.textContent = '\u25b2 ' + (counts[id] ?? 0);
+        });
+      }
+    }
+
+    function addEdgeEntry(edges) {
+      const ts = new Date().toLocaleTimeString();
+      const li = document.createElement('li');
+      li.textContent = ts + '  E' + edges.join(', E');
+      edgesLog.insertBefore(li, edgesLog.firstChild);
+    }
+
+    function sendControl() {
+      if (ws && ws.readyState === WebSocket.OPEN)
+        ws.send(JSON.stringify(controlState));
+    }
+
+    function makeToggle(container, prefix, id, stateMap) {
+      const btn = document.createElement('button');
+      btn.className = 'toggle off';
+      btn.innerHTML =
+        '<span class="toggle-id">' + prefix + id + '</span>' +
+        '<span class="toggle-state">OBERT</span>' +
+        '<span class="toggle-dot"></span>';
+      stateMap[id] = false;
+      btn.onclick = () => {
+        stateMap[id] = !stateMap[id];
+        const s = stateMap[id];
+        btn.querySelector('.toggle-state').textContent = s ? 'TANCAT' : 'OBERT';
+        btn.className = 'toggle ' + (s ? 'on' : 'off');
+        sendControl();
+      };
+      container.appendChild(btn);
+    }
+
+    function initControls(inputs, outputs) {
+      ctrlInputs.innerHTML  = '';
+      ctrlOutputs.innerHTML = '';
+      controlState.inputs  = {};
+      controlState.outputs = {};
+      Object.keys(inputs).sort((a,b)  => Number(a)-Number(b))
+        .forEach(id => makeToggle(ctrlInputs,  'E', Number(id), controlState.inputs));
+      Object.keys(outputs).sort((a,b) => Number(a)-Number(b))
+        .forEach(id => makeToggle(ctrlOutputs, 'S', Number(id), controlState.outputs));
+      ctrlSection.style.display = 'block';
+      sendControl();
+    }
+
+    function connect() {
+      ws = new WebSocket('ws://' + location.host + '/ws');
+      ws.onopen  = () => {
+        statusEl.textContent = '\u25CF Connectat';
+        statusEl.className   = 'ok';
+        loadConfig();
+      };
+      ws.onclose = () => {
+        ws = null;
+        statusEl.textContent = '\u25CF Desconnectat \u2014 reintentant...';
+        statusEl.className   = 'err';
+        setTimeout(connect, 2000);
+      };
+      ws.onerror = () => ws.close();
+      ws.onmessage = ({ data }) => {
+        const d = JSON.parse(data);
+        if (d.inputs && Object.keys(d.inputs).length > 0) {
+          const newIds = Object.keys(d.inputs).sort().join(',');
+          const curIds = Object.keys(controlState.inputs).sort().join(',');
+          const wsMatchesExpected = (expectedInputIds === null || newIds === expectedInputIds);
+          if (!controlsReady || (newIds !== curIds && wsMatchesExpected)) {
+            initControls(d.inputs, d.outputs || {});
+            controlsReady = true;
+            if (expectedInputIds !== null && newIds === expectedInputIds)
+              expectedInputIds = null;
+          }
+        }
+        if (d.inputs)  renderIOCards(gridInputs,  d.inputs, d.edge_counts || {});
+        if (d.outputs) renderIOCards(gridOutputs, d.outputs);
+        if (d.last_edges && d.last_edges.length > 0) addEdgeEntry(d.last_edges);
+      };
+    }
+
+    const cfgEditor  = document.getElementById('cfg-editor');
+    const cfgStatus  = document.getElementById('cfg-status');
+    const btnCargar  = document.getElementById('btn-cargar');
+    const btnAplicar = document.getElementById('btn-aplicar');
+
+    function setBusy(btn, label) {
+      if (!btn) return;
+      btn.textContent = label; btn.style.borderColor = '#d2a679';
+      btn.style.color = '#d2a679'; btn.disabled = true;
+    }
+    function setIdle(btn, label) {
+      if (!btn) return;
+      btn.textContent = label; btn.style.borderColor = '';
+      btn.style.color = ''; btn.disabled = false;
+    }
+    function fetchWithTimeout(url, opts, ms) {
+      const ctrl = new AbortController();
+      const tid  = setTimeout(() => ctrl.abort(), ms);
+      return fetch(url, { ...opts, signal: ctrl.signal }).finally(() => clearTimeout(tid));
+    }
+
+    function loadConfig() {
+      setBusy(btnCargar, 'Carregant...');
+      fetchWithTimeout('/configs', {}, 5000)
+        .then(r => r.json())
+        .then(d => { cfgEditor.value = JSON.stringify(d, null, 2); cfgStatus.textContent = 'Carregat'; cfgStatus.className = 'ok'; })
+        .catch(() => { cfgStatus.textContent = 'Error en carregar'; cfgStatus.className = 'err'; })
+        .finally(() => setIdle(btnCargar, 'Carregar'));
+    }
+
+    function applyConfig() {
+      let parsed;
+      try { parsed = JSON.parse(cfgEditor.value); } catch(e) {
+        cfgStatus.textContent = 'JSON no v\u00e0lid'; cfgStatus.className = 'err'; return;
+      }
+      if (!Array.isArray(parsed) || parsed.length > 16) {
+        cfgStatus.textContent = 'M\u00e0xim 16 entrades'; cfgStatus.className = 'err'; return;
+      }
+      setBusy(btnAplicar, 'Aplicant...');
+      fetchWithTimeout('/configs', { method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(parsed) }, 5000)
+        .then(r => {
+          cfgStatus.textContent = r.ok ? 'Aplicat' : 'Error ' + r.status;
+          cfgStatus.className = r.ok ? 'ok' : 'err';
+          if (r.ok) {
+            const ni = {}, no = {};
+            parsed.forEach(c => { ni[c.id] = false; (c.linked_outputs || []).forEach(o => { no[o] = false; }); });
+            expectedInputIds = Object.keys(ni).sort().join(',');
+            initControls(ni, no); controlsReady = true;
+          }
+        })
+        .catch(() => { cfgStatus.textContent = 'Error de xarxa'; cfgStatus.className = 'err'; })
+        .finally(() => setIdle(btnAplicar, 'Aplicar'));
+    }
+
+    connect();
+  </script>
+</body>
+</html>

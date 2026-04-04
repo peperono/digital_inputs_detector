@@ -13,6 +13,14 @@ OUT="$ROOT/build"
 
 mkdir -p "$OUT"
 
+# Generar header HTML desde web/index.html
+echo "Generando web/index_html.h..."
+bash "$ROOT/web/gen_html_header.sh"
+if [ $? -ne 0 ]; then
+    echo "ERROR generando index_html.h"
+    exit 1
+fi
+
 # Compilar mongoose.c como C
 echo "Compilando mongoose..."
 gcc -c -O1 \
