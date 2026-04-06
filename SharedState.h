@@ -2,6 +2,7 @@
 #include "DigitalEdgeDetector/InputConfig.h"
 #include <atomic>
 #include <mutex>
+#include <string>
 #include <unordered_map>
 #include <vector>
 #include <cstdint>
@@ -19,6 +20,7 @@ struct SharedState {
     bool                          remote_mode{false};  // true when using RemoteReader
     std::atomic<bool>             push_pending{false}; // set by WsPublisher, cleared by Mongoose
     std::vector<InputConfig>      configs;             // written at startup and on reconfigure
+    std::string                   test_log;            // test mode status (empty in remote mode)
 };
 
 extern SharedState se;

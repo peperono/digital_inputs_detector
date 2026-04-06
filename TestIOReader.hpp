@@ -1,10 +1,13 @@
 #pragma once
 #include "DigitalEdgeDetector/DigitalEdgeDetector.h"
+#include "SharedState.h"
 #include "qpcpp/include/qpcpp.hpp"
 #include "signals.h"
 #include <vector>
 #include <algorithm>
+#include <chrono>
 #include <cstdio>
+#include <string>
 
 // ── TestStep ──────────────────────────────────────────────────────────────────
 
@@ -134,16 +137,16 @@ static void verifyStep(int stepIdx, const TestStep& s,
 //  Paso 0 — estado inicial: entrada 1 OFF
 //           IO_STATE_CHANGED_SIG, sin flanco
 //  Paso 1 — sin cambio → sin eventos
-//  Paso 2 — SUBIDA entrada 1 → IO_STATE_CHANGED_SIG + EDGE_DETECTED_SIG(1)
+//  Paso 2 — TANCAMENT entrada 1 → IO_STATE_CHANGED_SIG + EDGE_DETECTED_SIG(1)
 //  Paso 3 — sin cambio → sin eventos
-//  Paso 4 — BAJADA entrada 1 → IO_STATE_CHANGED_SIG, sin flanco
-//  Paso 5 — segunda SUBIDA entrada 1 → IO_STATE_CHANGED_SIG + EDGE_DETECTED_SIG(1)
-//  Paso 6 — entrada 2 sube + entrada 1 baja → IO_STATE_CHANGED_SIG, sin flanco
+//  Paso 4 — OBERTURA entrada 1 → IO_STATE_CHANGED_SIG, sin flanco
+//  Paso 5 — segon TANCAMENT entrada 1 → IO_STATE_CHANGED_SIG + EDGE_DETECTED_SIG(1)
+//  Paso 6 — entrada 2 tanca + entrada 1 obre → IO_STATE_CHANGED_SIG, sin flanco
 //  Paso 7 — reset entrada 2 → IO_STATE_CHANGED_SIG, sin flanco
-//  Paso 8 — SUBIDA entrada 2, salida 10=OFF → IO_STATE_CHANGED_SIG, sin flanco
-//  Paso 9 — salida 10 se activa → IO_STATE_CHANGED_SIG, sin flanco
-//  Paso 10 — BAJADA entrada 2, salida 10=ON → IO_STATE_CHANGED_SIG, sin flanco
-//  Paso 11 — SUBIDA entrada 2, salida 10=ON → IO_STATE_CHANGED_SIG + EDGE_DETECTED_SIG(2)
+//  Paso 8 — TANCAMENT entrada 2, sortida 10=OFF → IO_STATE_CHANGED_SIG, sin flanco
+//  Paso 9 — sortida 10 s'activa → IO_STATE_CHANGED_SIG, sin flanco
+//  Paso 10 — OBERTURA entrada 2, sortida 10=ON → IO_STATE_CHANGED_SIG, sin flanco
+//  Paso 11 — TANCAMENT entrada 2, sortida 10=ON → IO_STATE_CHANGED_SIG + EDGE_DETECTED_SIG(2)
 
 inline IOReader makeTestReader() {
     static const std::vector<TestStep> steps = {
@@ -154,19 +157,19 @@ inline IOReader makeTestReader() {
           "sin cambio",                                       {} },
 
         { {{1,true}, {2,false}}, {{10,false}},
-          "SUBIDA entrada 1",                                 {1} },
+          "TANCAMENT entrada 1",                              {1} },
 
         { {{1,true}, {2,false}}, {{10,false}},
           "sin cambio",                                       {} },
 
         { {{1,false},{2,false}}, {{10,false}},
-          "BAJADA entrada 1 (ignorada, logic_positive=true)", {} },
+          "OBERTURA entrada 1 (ignorada, logic_positive=true)", {} },
 
         { {{1,true}, {2,false}}, {{10,false}},
-          "segunda SUBIDA entrada 1",                        {1} },
+          "segon TANCAMENT entrada 1",                        {1} },
 
         { {{1,false},{2,true}},  {{10,false}},
-          "entrada 2 sube + entrada 1 baja",                 {} },
+          "entrada 2 tanca + entrada 1 obre",                 {} },
 
         // ── Casos detection_always=false (entrada 2 vinculada a salida 10) ──
 
@@ -174,16 +177,16 @@ inline IOReader makeTestReader() {
           "reset entrada 2",                                  {} },
 
         { {{1,false},{2,true}},  {{10,false}},
-          "SUBIDA entrada 2 con salida 10=OFF: flanco ignorado", {} },
+          "TANCAMENT entrada 2 amb sortida 10=OFF: flanc ignorat", {} },
 
         { {{1,false},{2,true}},  {{10,true}},
-          "salida 10 se activa (sin cambio en entradas)",     {} },
+          "sortida 10 s'activa (sense canvi en entrades)",    {} },
 
         { {{1,false},{2,false}}, {{10,true}},
-          "BAJADA entrada 2 con salida 10=ON: bajada ignorada (logic_positive)", {} },
+          "OBERTURA entrada 2 amb sortida 10=ON: ignorada (logic_positive)", {} },
 
         { {{1,false},{2,true}},  {{10,true}},
-          "SUBIDA entrada 2 con salida 10=ON: flanco detectado", {2} },
+          "TANCAMENT entrada 2 amb sortida 10=ON: flanc detectat", {2} },
     };
 
     static int step = 0;
@@ -194,6 +197,43 @@ inline IOReader makeTestReader() {
     return [](std::unordered_map<int, bool>& inputs,
               std::unordered_map<int, bool>& outputs)
     {
+        static auto stepTime = std::chrono::steady_clock::now();
+        static const std::chrono::seconds STEP_DELAY{2};
+        static const std::chrono::seconds INIT_DELAY{5};
+        static std::unordered_map<int, bool> lastInputs;
+        static std::unordered_map<int, bool> lastOutputs;
+        static bool announced = false;  // s'ha anunciat el pas actual?
+
+        auto now     = std::chrono::steady_clock::now();
+        auto elapsed = now - stepTime;
+
+        // ── Anunciar el pas abans d'esperar ──────────────────────────────────
+        if (!announced) {
+            if (step == 0) {
+                std::printf("[Test] Esperant %lld segons abans de comencar...\n",
+                            (long long)INIT_DELAY.count());
+                std::lock_guard<std::mutex> lk(se.mtx);
+                se.test_log = "Esperant " + std::to_string(INIT_DELAY.count()) + "s per comencar...";
+            } else if (step < static_cast<int>(steps.size())) {
+                std::printf("[Test] Pas %d: %s\n", step, steps[step].description);
+                std::lock_guard<std::mutex> lk(se.mtx);
+                se.test_log = "Pas " + std::to_string(step) + ": " + steps[step].description;
+            }
+            se.push_pending.store(true);
+            announced = true;
+            stepTime  = now;
+            elapsed   = std::chrono::seconds(0);
+        }
+
+        // ── Esperar el delay ─────────────────────────────────────────────────
+        auto delay = (step == 0) ? INIT_DELAY : STEP_DELAY;
+        inputs  = lastInputs;
+        outputs = lastOutputs;
+        if (elapsed < delay) return;
+
+        // ── Executar el pas ──────────────────────────────────────────────────
+        announced = false;  // el següent pas haurà d'anunciar-se
+
         if (step > 0) {
             verifyStep(step - 1, steps[step - 1], prevInputs, prevOutputs);
             prevInputs  = steps[step - 1].inputs;
@@ -201,14 +241,21 @@ inline IOReader makeTestReader() {
         }
 
         if (step >= static_cast<int>(steps.size())) {
-            std::printf("\n=== Test completado ===\n");
+            std::printf("\n=== Test completat ===\n");
+            {
+                std::lock_guard<std::mutex> lk(se.mtx);
+                se.test_log = "Test completat";
+            }
+            se.push_pending.store(true);
             QP::QF::stop();
             return;
         }
 
         const TestStep& s = steps[step];
-        inputs  = s.inputs;
-        outputs = s.outputs;
+        inputs      = s.inputs;
+        outputs     = s.outputs;
+        lastInputs  = s.inputs;
+        lastOutputs = s.outputs;
         ++step;
     };
 }

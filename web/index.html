@@ -12,6 +12,16 @@
     header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 12px; }
     h1 { color: #58a6ff; font-size: 20px; }
     #status { font-size: 12px; }
+    #test-log-box {
+      display: none;
+      background: #161b22; border: 1px solid #30363d; border-radius: 6px;
+      padding: 8px 12px; max-height: 120px; overflow-y: auto;
+      font-size: 11px; list-style: none; font-family: 'Courier New', monospace;
+      min-width: 220px;
+    }
+    #test-log-box li { padding: 2px 0; border-bottom: 1px solid #21262d; color: #3fb950; }
+    #test-log-box li:last-child { border-bottom: none; }
+    #test-log-box li.dim { color: #484f58; }
     .ok  { color: #3fb950; }
     .err { color: #f85149; }
 
@@ -107,7 +117,6 @@
     <h1>Digital IO Monitor</h1>
     <div id="status" class="err">&#9679; Desconnectat</div>
   </header>
-
   <div class="monitor-row">
     <div class="io-section">
       <div class="section-title">Entrades</div>
@@ -120,6 +129,10 @@
     <div class="io-section">
       <div class="section-title">Flancs detectats</div>
       <ul id="edges-log"></ul>
+    </div>
+    <div class="io-section" id="test-log-section" style="display:none">
+      <div class="section-title">Log de test</div>
+      <ul id="test-log-box"></ul>
     </div>
   </div>
 
@@ -165,7 +178,9 @@
     let expectedInputIds = null;
     const controlState = { inputs: {}, outputs: {} };
 
-    const statusEl    = document.getElementById('status');
+    const statusEl       = document.getElementById('status');
+    const testLogSection = document.getElementById('test-log-section');
+    const testLogBox     = document.getElementById('test-log-box');
     const gridInputs  = document.getElementById('grid-inputs');
     const gridOutputs = document.getElementById('grid-outputs');
     const edgesLog    = document.getElementById('edges-log');
@@ -276,6 +291,15 @@
         if (d.inputs)  renderIOCards(gridInputs,  d.inputs, d.edge_counts || {});
         if (d.outputs) renderIOCards(gridOutputs, d.outputs);
         if (d.last_edges && d.last_edges.length > 0) addEdgeEntry(d.last_edges);
+        if (d.test_log !== undefined && d.test_log) {
+          testLogSection.style.display = 'block';
+          testLogBox.style.display = 'block';
+          const li = document.createElement('li');
+          li.textContent = d.test_log;
+          // Marcar entrades anteriors com a dim
+          testLogBox.querySelectorAll('li:not(.dim)').forEach(el => el.classList.add('dim'));
+          testLogBox.insertBefore(li, testLogBox.firstChild);
+        }
       };
     }
 
