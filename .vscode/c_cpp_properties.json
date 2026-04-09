@@ -1,22 +1,21 @@
 {
     "configurations": [
         {
-            "name": "MinGW64",
+            "name": "Devcontainer",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:/msys64/mingw64/include",
-                "C:/msys64/mingw64/include/c++/15.2.0",
-                "C:/msys64/mingw64/include/c++/15.2.0/x86_64-w64-mingw32",
-                "C:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/15.2.0/include"
+                "/usr/x86_64-w64-mingw32/include",
+                "/usr/lib/gcc/x86_64-w64-mingw32/*/include",
+                "/usr/lib/gcc/x86_64-w64-mingw32/*/include/c++"
             ],
             "defines": [
                 "_WIN32",
                 "__MINGW64__"
             ],
-            "compilerPath": "C:/msys64/mingw64/bin/g++.exe",
+            "compilerPath": "/usr/bin/x86_64-w64-mingw32-g++",
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "windows-gcc-x64"
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4

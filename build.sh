@@ -21,13 +21,24 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Detectar compilador: MSYS2/nativo o cross-compiler de devcontainer
+if command -v x86_64-w64-mingw32-g++ &>/dev/null; then
+    GPP=x86_64-w64-mingw32-g++
+    GCC=x86_64-w64-mingw32-gcc
+else
+    GPP=g++
+    GCC=gcc
+fi
+echo "Compilador: $GPP"
+[ "$GPP" = "x86_64-w64-mingw32-g++" ] && EXTRA_LIBS="-lwinpthread" || EXTRA_LIBS=""
+
 # Compilar mongoose.c como C
 echo "Compilando mongoose..."
-gcc -c -O1 \
+$GCC -c -O1 \
     -I"$ROOT/mongoose" \
     "$ROOT/mongoose/mongoose.c" \
     -o "$OUT/mongoose.o" 2>/dev/null \
-|| g++ -c -O1 -x c \
+|| $GPP -c -O1 -x c \
     -I"$ROOT/mongoose" \
     "$ROOT/mongoose/mongoose.c" \
     -o "$OUT/mongoose.o"
@@ -38,7 +49,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Compilando app..."
-g++ -std=c++17 -Wall -O1 -static \
+$GPP -std=c++17 -Wall -O1 -static \
     -I"$ROOT" \
     -I"$QPCPP/include" \
     -I"$QPCPP/src" \
@@ -62,7 +73,7 @@ g++ -std=c++17 -Wall -O1 -static \
     "$QPCPP/ports/win32-qv/qf_port.cpp" \
     "$OUT/mongoose.o" \
     -o "$OUT/app.exe" \
-    -lwinmm -lws2_32
+    -lwinmm -lws2_32 ${EXTRA_LIBS:-}
 
 if [ $? -eq 0 ]; then
     echo "OK — build/app.exe"

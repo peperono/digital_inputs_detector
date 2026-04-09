@@ -1,0 +1,18 @@
+{
+    "name": "digital-inputs-detector",
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",
+                "anthropic.claude-code"
+            ]
+        }
+    },
+    "postCreateCommand": "echo 'export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:$PATH' >> ~/.bashrc && echo 'Dev container llest. Usa: bash build.sh'",
+    "mounts": [
+        "source=${localEnv:USERPROFILE}/.claude,target=/home/vscode/.claude,type=bind,consistency=cached"
+    ]
+}
