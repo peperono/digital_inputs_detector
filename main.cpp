@@ -70,7 +70,6 @@ int main() {
     // Inicializar SharedState
     {
         std::lock_guard<std::mutex> lk(se.mtx);
-        se.remote_mode = (choice == 2);
         se.configs     = configs;
         // Pre-populate inputs/outputs so the browser sees the IO structure
         // on the very first WebSocket message (before the first poll event).

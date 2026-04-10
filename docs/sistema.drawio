@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.2.8 Chrome/140.0.7339.240 Electron/38.4.0 Safari/537.36" version="28.2.8">
   <diagram name="Sistema" id="SistemaDiagram">
-    <mxGraphModel dx="2003" dy="1443" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1400" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="1889" dy="1369" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" pageWidth="1400" pageHeight="827" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -13,53 +13,49 @@
         <mxCell id="SYS-1B" value="&lt;b&gt;IOReader_Win32&lt;/b&gt;&lt;div&gt;simula entrades/sortides&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" parent="1" vertex="1">
           <mxGeometry x="-209" y="25" width="160" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="SYS-1T" value="&lt;b&gt;IOReader_Test&lt;/b&gt;&lt;div&gt;makeTestReader()&lt;/div&gt;&lt;div&gt;simula passos / verifica&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" parent="1" vertex="1">
+        <mxCell id="SYS-1T" value="&lt;b&gt;IOReader_Test&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" parent="1" vertex="1">
           <mxGeometry x="58" y="726" width="160" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="SYS-1E" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#333333;endArrow=block;endFill=0;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="SYS-1T" target="SYS-1" edge="1">
+        <mxCell id="SYS-1E" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#000000;endArrow=block;endFill=0;exitX=0.25;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="SYS-1T" target="SYS-1" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="100" y="25" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="96" y="668" />
-              <mxPoint x="96" y="39" />
-              <mxPoint x="98" y="39" />
+              <mxPoint x="98" y="174" />
+              <mxPoint x="98" y="174" />
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="SYS-1F" value="escriu se.test_log&lt;div&gt;push_pending = true&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#0050ef;endArrow=block;endFill=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" parent="1" source="SYS-1T" target="SYS-13" edge="1">
+        <mxCell id="SYS-1F" value="escriu se.test_log" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#0050ef;endArrow=block;endFill=1;exitX=0.75;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" parent="1" source="SYS-1T" target="SYS-13" edge="1">
           <mxGeometry x="-0.2957" relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="178" y="372" />
+              <mxPoint x="178" y="334" />
             </Array>
             <mxPoint as="offset" />
+            <mxPoint x="436" y="308" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="SYS-1C" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#333333;endArrow=block;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="SYS-1A" target="SYS-1" edge="1">
+        <mxCell id="SYS-1C" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#000000;endArrow=block;endFill=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="SYS-1A" target="SYS-1" edge="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="-18" y="-32" />
-              <mxPoint x="-18" y="-19" />
-              <mxPoint x="-25" y="-19" />
-              <mxPoint x="-25" y="9" />
-              <mxPoint x="8" y="9" />
-              <mxPoint x="8" y="2" />
+              <mxPoint x="-18" y="2" />
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="SYS-1D" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#333333;endArrow=block;endFill=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" parent="1" source="SYS-1B" target="SYS-1" edge="1">
+        <mxCell id="SYS-1D" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#000000;endArrow=block;endFill=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" parent="1" source="SYS-1B" target="SYS-1" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="SYS-3" value="&lt;b&gt;DigitalEdgeDetector&lt;/b&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;&lt;div&gt;reader: IOReader&lt;/div&gt;&lt;div&gt;configs: InputConfig[]&lt;/div&gt;&lt;div&gt;remoteMode: bool&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" parent="1" vertex="1">
+        <mxCell id="SYS-3" value="&lt;b&gt;DigitalEdgeDetector&lt;/b&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;&lt;div&gt;reader: IOReader&lt;/div&gt;&lt;div&gt;configs: InputConfig[]&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" parent="1" vertex="1">
           <mxGeometry x="410" y="-32" width="180" height="100" as="geometry" />
         </mxCell>
         <mxCell id="SYS-4" value="&lt;b&gt;&lt;i&gt;Monitor&lt;/i&gt;&lt;/b&gt;&lt;div&gt;&lt;i&gt;QActive&lt;/i&gt;&lt;/div&gt;&lt;div&gt;{abstract}&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" parent="1" vertex="1">
           <mxGeometry x="1178" y="-25" width="150" height="80" as="geometry" />
         </mxCell>
         <mxCell id="SYS-9" value="&lt;b&gt;Monitor_Win32&lt;/b&gt;&lt;div&gt;imprime mensaje&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" parent="1" vertex="1">
-          <mxGeometry x="1385" y="33" width="150" height="60" as="geometry" />
+          <mxGeometry x="1385" y="30" width="150" height="60" as="geometry" />
         </mxCell>
         <mxCell id="SYS-11" value="&lt;b&gt;Monitor_ESP32&lt;/b&gt;&lt;div&gt;activa salida digital&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" parent="1" vertex="1">
-          <mxGeometry x="1385" y="-69" width="150" height="60" as="geometry" />
+          <mxGeometry x="1385" y="-67" width="150" height="60" as="geometry" />
         </mxCell>
         <mxCell id="SYS-10" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#333333;endArrow=block;endFill=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="SYS-9" edge="1">
           <mxGeometry relative="1" as="geometry">
@@ -95,22 +91,22 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="SYS-13" value="&lt;b&gt;SharedState se&lt;/b&gt;&lt;div&gt;se.mtx&lt;/div&gt;&lt;div&gt;se.inputs&lt;/div&gt;&lt;div&gt;se.outputs&lt;/div&gt;&lt;div&gt;se.last_edges&lt;/div&gt;&lt;div&gt;se.edge_counts&lt;/div&gt;&lt;div&gt;se.remote_mode&lt;/div&gt;&lt;div&gt;se.push_pending&lt;/div&gt;&lt;div&gt;se.configs&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;fontColor=#333333;" parent="1" vertex="1">
-          <mxGeometry x="464" y="262" width="160" height="147" as="geometry" />
+        <mxCell id="SYS-13" value="&lt;b&gt;SharedState se&lt;/b&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(51, 51, 51), rgb(193, 193, 193));&quot;&gt;se.mutex&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(51, 51, 51), rgb(193, 193, 193));&quot;&gt;se.push_pending&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(51, 51, 51), rgb(193, 193, 193));&quot;&gt;se.inputs&lt;/span&gt;&lt;/div&gt;&lt;div&gt;se.outputs&lt;/div&gt;&lt;div&gt;se.last_edges&lt;/div&gt;&lt;div&gt;se.edge_counts&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(51, 51, 51), rgb(193, 193, 193));&quot;&gt;se.configs&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(51, 51, 51), rgb(193, 193, 193));&quot;&gt;se.test_log&lt;/span&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;fontColor=#333333;" parent="1" vertex="1">
+          <mxGeometry x="483" y="235" width="122" height="132" as="geometry" />
         </mxCell>
         <mxCell id="SYS-14" value="&lt;b&gt;HttpServer&lt;/b&gt;&lt;div&gt;thread Mongoose&lt;/div&gt;&lt;div&gt;:8080&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffff88;strokeColor=#36393d;fontSize=11;" parent="1" vertex="1">
           <mxGeometry x="464" y="472" width="160" height="70" as="geometry" />
         </mxCell>
         <mxCell id="SYS-15-WS" value="&lt;b&gt;Browser&lt;/b&gt;&lt;div&gt;WebSocket /ws&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontColor=#333333;fontSize=11;" parent="1" vertex="1">
-          <mxGeometry x="831" y="557" width="150" height="60" as="geometry" />
+          <mxGeometry x="884" y="557" width="150" height="60" as="geometry" />
         </mxCell>
         <mxCell id="SYS-15-HTTP" value="&lt;b&gt;Browser&lt;/b&gt;&lt;div&gt;HTTP REST&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontColor=#333333;fontSize=11;" parent="1" vertex="1">
-          <mxGeometry x="831" y="425" width="150" height="60" as="geometry" />
+          <mxGeometry x="884" y="423" width="150" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="SYS-17" value="push_pending flag" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#0050ef;endArrow=block;endFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="SYS-13" target="SYS-14" edge="1">
+        <mxCell id="SYS-17" value="llegeix se.*" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#0050ef;endArrow=block;endFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="SYS-13" target="SYS-14" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="SYS-18" value="WebSocket&lt;div&gt;→ se.inputs/outputs/last_edges/edge_counts&lt;/div&gt;&lt;div&gt;← inputs/outputs&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#0050ef;startArrow=block;startFill=1;endArrow=block;endFill=1;exitX=1;exitY=0.7;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="SYS-14" target="SYS-15-WS" edge="1">
+        <mxCell id="SYS-18" value="WebSocket&lt;div&gt;→ se.inputs/outputs/last_edges/edge_counts/test_log&lt;/div&gt;&lt;div&gt;← inputs/outputs&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#0050ef;startArrow=block;startFill=1;endArrow=block;endFill=1;exitX=1;exitY=0.7;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="SYS-14" target="SYS-15-WS" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="SYS-26" value="GET: / , /configs (se.configs[])&lt;div&gt;PUT: /configs&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#0050ef;startArrow=block;startFill=1;endArrow=block;endFill=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.3;entryDx=0;entryDy=0;" parent="1" source="SYS-15-HTTP" target="SYS-14" edge="1">
@@ -127,7 +123,7 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="SYS-31" value="escriu se.*&lt;div&gt;push_pending = true&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#0050ef;endArrow=block;endFill=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="SYS-3" target="SYS-13" edge="1">
+        <mxCell id="SYS-31" value="escriu se.*" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#0050ef;endArrow=block;endFill=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="SYS-3" target="SYS-13" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="500" y="180.00000000000023" as="targetPoint" />
           </mxGeometry>
@@ -170,11 +166,29 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="SYS-1H" value="llegeix g_*&lt;div&gt;(verifyStep)&lt;/div&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#0050ef;endArrow=block;endFill=1;" parent="1" source="SYS-GG" target="SYS-1T" edge="1">
+        <mxCell id="SYS-1H" value="llegeix g_*" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#0050ef;endArrow=block;endFill=1;" parent="1" source="SYS-GG" target="SYS-1T" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="LEG-0" value="&lt;div&gt;&lt;b&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;Colors de nodes:&lt;/font&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;Verd — fil QV (cooperatiu)&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;Groc — fil Mongoose&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;Blanc — procés extern (browser)&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;Gris —&amp;nbsp; dades compartides entre fils&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;b&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;Fletxes:&lt;/font&gt;&lt;/b&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;─── blava — crida directa / escriptura&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;- - - grisa — event QP (pub/sub o post)&lt;/font&gt;&lt;/div&gt;&lt;div&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;──▷ buida — herència&lt;/font&gt;&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=10;align=left;verticalAlign=top;spacingLeft=8;spacingTop=6;" parent="1" vertex="1">
-          <mxGeometry x="1291" y="542" width="250" height="190" as="geometry" />
+        <mxCell id="B-PYQ8zZbNTlqdlpL-Y3-3" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="1" source="B-PYQ8zZbNTlqdlpL-Y3-2" target="SYS-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="B-PYQ8zZbNTlqdlpL-Y3-2" value="Dades compartides pels fils AO i Mongoose. Cal mutex." style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=center;" vertex="1" parent="1">
+          <mxGeometry x="667" y="260" width="165" height="66" as="geometry" />
+        </mxCell>
+        <mxCell id="B-PYQ8zZbNTlqdlpL-Y3-5" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;startSize=8;endSize=8;" edge="1" parent="1" source="B-PYQ8zZbNTlqdlpL-Y3-4" target="SYS-1T">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="B-PYQ8zZbNTlqdlpL-Y3-4" value="Genera entrada per a DigitalEdgeDetector i verifica sortida" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=center;" vertex="1" parent="1">
+          <mxGeometry x="-73" y="871" width="154" height="81" as="geometry" />
+        </mxCell>
+        <mxCell id="B-PYQ8zZbNTlqdlpL-Y3-7" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=75;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="1" source="B-PYQ8zZbNTlqdlpL-Y3-6" target="SYS-GG">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="B-PYQ8zZbNTlqdlpL-Y3-6" value="Dades compartides entre TestObserver(fil QV) i IOReader_Test(fil QV).&lt;div&gt;No cal mutex perquè ambdòs components estan al mateix fil col·laboratiu.&lt;/div&gt;" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=center;" vertex="1" parent="1">
+          <mxGeometry x="422.5" y="899" width="175" height="133" as="geometry" />
+        </mxCell>
+        <mxCell id="B-PYQ8zZbNTlqdlpL-Y3-8" value="&lt;div style=&quot;font-size: 10px; text-align: left;&quot;&gt;&lt;b&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;Colors de nodes:&lt;/font&gt;&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 10px; text-align: left;&quot;&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;Verd — fil QV (cooperatiu)&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 10px; text-align: left;&quot;&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;Groc — fil Mongoose&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 10px; text-align: left;&quot;&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;Blanc — procés extern (browser)&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 10px; text-align: left;&quot;&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;Gris —&amp;nbsp; dades compartides entre fils&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 10px; text-align: left;&quot;&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;&lt;br&gt;&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 10px; text-align: left;&quot;&gt;&lt;b&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;Fletxes:&lt;/font&gt;&lt;/b&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 10px; text-align: left;&quot;&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;─── blava — crida directa / escriptura&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 10px; text-align: left;&quot;&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;- - - grisa — event QP (pub/sub o post)&lt;/font&gt;&lt;/div&gt;&lt;div style=&quot;font-size: 10px; text-align: left;&quot;&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;──▷ buida — herència&lt;/font&gt;&lt;/div&gt;" style="shape=note2;boundedLbl=1;whiteSpace=wrap;html=1;size=25;verticalAlign=top;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="289" width="309" height="242" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
