@@ -94,6 +94,8 @@ Q_STATE_DEF(DigitalEdgeDetector, operating) {
                         se.last_edges = m_edgeEvt.input_ids;
                         for (int id : m_edgeEvt.input_ids)
                             ++se.edge_counts[id];
+                    } else {
+                        se.last_edges.clear();
                     }
                 }
                 se.push_pending.store(true);

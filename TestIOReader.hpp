@@ -123,6 +123,13 @@ static void verifyStep(int stepIdx, const TestStep& s,
         std::printf("]\n");
     }
 
+    // Actualitzar SharedState amb el resultat
+    {
+        std::lock_guard<std::mutex> lk(se.mtx);
+        se.test_log = std::to_string(stepIdx + 1) + "|" + s.description + "|" + (ok ? "OK" : "ERROR");
+    }
+    se.push_pending.store(true);
+
     // Reset para el siguiente paso
     g_detectedEdges.clear();
     g_edgeReceived = false;
@@ -202,7 +209,8 @@ inline IOReader makeTestReader() {
         static const std::chrono::seconds INIT_DELAY{5};
         static std::unordered_map<int, bool> lastInputs;
         static std::unordered_map<int, bool> lastOutputs;
-        static bool announced = false;  // s'ha anunciat el pas actual?
+        static bool announced        = false;
+        static bool pendingComplete  = false;
 
         auto now     = std::chrono::steady_clock::now();
         auto elapsed = now - stepTime;
@@ -213,13 +221,14 @@ inline IOReader makeTestReader() {
                 std::printf("[Test] Esperant %lld segons abans de comencar...\n",
                             (long long)INIT_DELAY.count());
                 std::lock_guard<std::mutex> lk(se.mtx);
-                se.test_log = "Esperant " + std::to_string(INIT_DELAY.count()) + "s per comencar...";
+                se.test_log = "wait|Esperant " + std::to_string(INIT_DELAY.count()) + "s per comencar...|";
+                se.push_pending.store(true);
             } else if (step < static_cast<int>(steps.size())) {
-                std::printf("[Test] Pas %d: %s\n", step, steps[step].description);
+                std::printf("[Test] Pas %d: %s\n", step + 1, steps[step].description);
                 std::lock_guard<std::mutex> lk(se.mtx);
-                se.test_log = "Pas " + std::to_string(step) + ": " + steps[step].description;
+                se.test_log = std::to_string(step + 1) + "|" + steps[step].description + "|";
+                se.push_pending.store(true);
             }
-            se.push_pending.store(true);
             announced = true;
             stepTime  = now;
             elapsed   = std::chrono::seconds(0);
@@ -232,7 +241,7 @@ inline IOReader makeTestReader() {
         if (elapsed < delay) return;
 
         // ── Executar el pas ──────────────────────────────────────────────────
-        announced = false;  // el següent pas haurà d'anunciar-se
+        announced = false;
 
         if (step > 0) {
             verifyStep(step - 1, steps[step - 1], prevInputs, prevOutputs);
@@ -241,10 +250,19 @@ inline IOReader makeTestReader() {
         }
 
         if (step >= static_cast<int>(steps.size())) {
+            if (!pendingComplete) {
+                // verifyStep acaba d'escriure el resultat del darrer pas.
+                // Retornem sense sobreescriure test_log perquè HttpServer
+                // pugui enviar-lo abans de "Test completat".
+                pendingComplete = true;
+                inputs  = lastInputs;
+                outputs = lastOutputs;
+                return;
+            }
             std::printf("\n=== Test completat ===\n");
             {
                 std::lock_guard<std::mutex> lk(se.mtx);
-                se.test_log = "Test completat";
+                se.test_log = "end|Test completat|";
             }
             se.push_pending.store(true);
             QP::QF::stop();
@@ -252,6 +270,12 @@ inline IOReader makeTestReader() {
         }
 
         const TestStep& s = steps[step];
+        // Pas 1 (índex 0): s'anuncia aquí perquè el bloc d'anunci usa "wait"
+        if (step == 0) {
+            std::lock_guard<std::mutex> lk(se.mtx);
+            se.test_log = "1|" + std::string(s.description) + "|";
+            se.push_pending.store(true);
+        }
         inputs      = s.inputs;
         outputs     = s.outputs;
         lastInputs  = s.inputs;
