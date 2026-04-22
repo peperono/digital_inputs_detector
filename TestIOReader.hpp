@@ -7,7 +7,10 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdio>
+#include <cstdlib>
 #include <string>
+
+static const char* TEST_LOG_FILE = "test_result.log";
 
 // ── TestStep ──────────────────────────────────────────────────────────────────
 
@@ -123,12 +126,11 @@ static void verifyStep(int stepIdx, const TestStep& s,
         std::printf("]\n");
     }
 
-    // Actualitzar SharedState amb el resultat
-    {
-        std::lock_guard<std::mutex> lk(se.mtx);
-        se.test_log = std::to_string(stepIdx + 1) + "|" + s.description + "|" + (ok ? "OK" : "ERROR");
+    // Escriure resultat al fitxer de log
+    if (FILE* f = std::fopen(TEST_LOG_FILE, "a")) {
+        std::fprintf(f, "%d|%s|%s\n", stepIdx + 1, s.description, ok ? "OK" : "ERROR");
+        std::fclose(f);
     }
-    se.push_pending.store(true);
 
     // Reset para el siguiente paso
     g_detectedEdges.clear();
@@ -158,42 +160,36 @@ static void verifyStep(int stepIdx, const TestStep& s,
 inline IOReader makeTestReader() {
     static const std::vector<TestStep> steps = {
         { {{1,false},{2,false}}, {{10,false}},
-          "inicial entrada 1=OFF",                            {} },
+          "Estat inicial: E1=OBERT, E2=OBERT, S10=OBERT",                            {} },
 
         { {{1,false},{2,false}}, {{10,false}},
-          "sin cambio",                                       {} },
+          "(Sense canvis) => (sense events)",                                       {} },
 
         { {{1,true}, {2,false}}, {{10,false}},
-          "TANCAMENT entrada 1",                              {1} },
+          " (E1=TANCAT) => (flanc E1)",                              {1} },
 
         { {{1,true}, {2,false}}, {{10,false}},
-          "sin cambio",                                       {} },
+          "(Sense canvis) => (sense events)",                                       {} },
 
         { {{1,false},{2,false}}, {{10,false}},
-          "OBERTURA entrada 1 (ignorada, logic_positive=true)", {} },
+          "(E1 = OBERT) => (sense events)", {} },
 
         { {{1,true}, {2,false}}, {{10,false}},
-          "segon TANCAMENT entrada 1",                        {1} },
+          "(E1 = TANCAT) => (flanc E1)",                        {1} },
 
         { {{1,false},{2,true}},  {{10,false}},
-          "entrada 2 tanca + entrada 1 obre",                 {} },
+          "(E1 = OBERT, E2 = TANCAT) ==> (sense events) ",                 {} },
 
         // ── Casos detection_always=false (entrada 2 vinculada a salida 10) ──
 
         { {{1,false},{2,false}}, {{10,false}},
-          "reset entrada 2",                                  {} },
-
-        { {{1,false},{2,true}},  {{10,false}},
-          "TANCAMENT entrada 2 amb sortida 10=OFF: flanc ignorat", {} },
+          "(E2 = OBERT) => (sense events)",                                  {} },
 
         { {{1,false},{2,true}},  {{10,true}},
-          "sortida 10 s'activa (sense canvi en entrades)",    {} },
+          "(E2=TANCAT, S10=TANCAT) => (flanc E2)", {2} },
 
         { {{1,false},{2,false}}, {{10,true}},
-          "OBERTURA entrada 2 amb sortida 10=ON: ignorada (logic_positive)", {} },
-
-        { {{1,false},{2,true}},  {{10,true}},
-          "TANCAMENT entrada 2 amb sortida 10=ON: flanc detectat", {2} },
+          "(E2 = OBERT) => (sense events)", {} },
     };
 
     static int step = 0;
@@ -205,30 +201,19 @@ inline IOReader makeTestReader() {
               std::unordered_map<int, bool>& outputs)
     {
         static auto stepTime = std::chrono::steady_clock::now();
-        static const std::chrono::seconds STEP_DELAY{2};
-        static const std::chrono::seconds INIT_DELAY{5};
+        static const std::chrono::milliseconds STEP_DELAY{200};
+        static const std::chrono::milliseconds INIT_DELAY{200};
         static std::unordered_map<int, bool> lastInputs;
         static std::unordered_map<int, bool> lastOutputs;
-        static bool announced        = false;
-        static bool pendingComplete  = false;
+        static bool announced = false;
 
         auto now     = std::chrono::steady_clock::now();
         auto elapsed = now - stepTime;
 
         // ── Anunciar el pas abans d'esperar ──────────────────────────────────
         if (!announced) {
-            if (step == 0) {
-                std::printf("[Test] Esperant %lld segons abans de comencar...\n",
-                            (long long)INIT_DELAY.count());
-                std::lock_guard<std::mutex> lk(se.mtx);
-                se.test_log = "wait|Esperant " + std::to_string(INIT_DELAY.count()) + "s per comencar...|";
-                se.push_pending.store(true);
-            } else if (step < static_cast<int>(steps.size())) {
+            if (step < static_cast<int>(steps.size()))
                 std::printf("[Test] Pas %d: %s\n", step + 1, steps[step].description);
-                std::lock_guard<std::mutex> lk(se.mtx);
-                se.test_log = std::to_string(step + 1) + "|" + steps[step].description + "|";
-                se.push_pending.store(true);
-            }
             announced = true;
             stepTime  = now;
             elapsed   = std::chrono::seconds(0);
@@ -250,36 +235,15 @@ inline IOReader makeTestReader() {
         }
 
         if (step >= static_cast<int>(steps.size())) {
-            if (!pendingComplete) {
-                // verifyStep acaba d'escriure el resultat del darrer pas.
-                // Retornem sense sobreescriure test_log perquè HttpServer
-                // pugui enviar-lo abans de "Test completat".
-                pendingComplete = true;
-                inputs  = lastInputs;
-                outputs = lastOutputs;
-                return;
-            }
             std::printf("\n=== Test completat ===\n");
-            {
-                std::lock_guard<std::mutex> lk(se.mtx);
-                se.test_log = "end|Test completat|";
-            }
-            se.push_pending.store(true);
             QP::QF::stop();
             return;
         }
 
-        const TestStep& s = steps[step];
-        // Pas 1 (índex 0): s'anuncia aquí perquè el bloc d'anunci usa "wait"
-        if (step == 0) {
-            std::lock_guard<std::mutex> lk(se.mtx);
-            se.test_log = "1|" + std::string(s.description) + "|";
-            se.push_pending.store(true);
-        }
-        inputs      = s.inputs;
-        outputs     = s.outputs;
-        lastInputs  = s.inputs;
-        lastOutputs = s.outputs;
+        inputs      = steps[step].inputs;
+        outputs     = steps[step].outputs;
+        lastInputs  = steps[step].inputs;
+        lastOutputs = steps[step].outputs;
         ++step;
     };
 }

@@ -19,7 +19,6 @@ struct SharedState {
     std::unordered_map<int, int>  edge_counts;    // cumulative edge count per input id
     std::atomic<bool>             push_pending{false}; // set by WsPublisher, cleared by Mongoose
     std::vector<InputConfig>      configs;             // written at startup and on reconfigure
-    std::string                   test_log;            // test mode status (empty in remote mode)
 };
 
 extern SharedState se;

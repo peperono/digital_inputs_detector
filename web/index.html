@@ -12,21 +12,6 @@
     header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 12px; }
     h1 { color: #58a6ff; font-size: 20px; }
     #status { font-size: 12px; }
-    #test-log-box {
-      display: none;
-      background: #161b22; border: 1px solid #30363d; border-radius: 6px;
-      padding: 8px 12px; max-height: 160px; overflow-y: auto;
-      font-size: 11px; list-style: none; font-family: 'Courier New', monospace;
-      min-width: 340px;
-    }
-    #test-log-box li { display: flex; gap: 8px; align-items: center; padding: 2px 0; border-bottom: 1px solid #21262d; }
-    #test-log-box li:last-child { border-bottom: none; }
-    .step-num  { color: #c9d1d9; font-weight: 700; min-width: 20px; text-align: right; }
-    .step-desc { color: #c9d1d9; flex: 1; }
-    .step-result { font-weight: 700; min-width: 44px; text-align: right; }
-    .step-result.ok  { color: #3fb950; }
-    .step-result.err { color: #f85149; }
-    .step-msg  { color: #8b949e; flex: 1; }
     .ok  { color: #3fb950; }
     .err { color: #f85149; }
 
@@ -133,10 +118,6 @@
       <div class="section-title">Flancs detectats</div>
       <ul id="edges-log"></ul>
     </div>
-    <div class="io-section" id="test-log-section" style="display:none">
-      <div class="section-title">Log de test</div>
-      <ul id="test-log-box"></ul>
-    </div>
   </div>
 
   <hr>
@@ -177,12 +158,9 @@
     let ws = null;
     let controlsReady = false;
     let expectedInputIds = null;
-    let lastTestLog = '';
     const controlState = { inputs: {}, outputs: {} };
 
     const statusEl       = document.getElementById('status');
-    const testLogSection = document.getElementById('test-log-section');
-    const testLogBox     = document.getElementById('test-log-box');
     const gridInputs  = document.getElementById('grid-inputs');
     const gridOutputs = document.getElementById('grid-outputs');
     const edgesLog    = document.getElementById('edges-log');
@@ -268,7 +246,6 @@
       ws.onopen  = () => {
         statusEl.textContent = '\u25CF Connectat';
         statusEl.className   = 'ok';
-        lastTestLog = '';
         loadConfig();
       };
       ws.onclose = () => {
@@ -294,33 +271,6 @@
         if (d.inputs)  renderIOCards(gridInputs,  d.inputs, d.edge_counts || {});
         if (d.outputs) renderIOCards(gridOutputs, d.outputs);
         if (d.last_edges && d.last_edges.length > 0) addEdgeEntry(d.last_edges);
-        if (d.test_log !== undefined && d.test_log && d.test_log !== lastTestLog) {
-          lastTestLog = d.test_log;
-          testLogSection.style.display = 'block';
-          testLogBox.style.display = 'block';
-          const parts = d.test_log.split('|');
-          const stepKey = parts[0];
-          const desc    = parts[1] || '';
-          const result  = parts[2] || '';
-          if (result !== '') {
-            // Actualitzar resultat d'una entrada existent
-            const existing = testLogBox.querySelector(`li[data-step="${stepKey}"]`);
-            if (existing) {
-              const el = existing.querySelector('.step-result');
-              if (el) { el.textContent = result; el.className = 'step-result ' + (result === 'OK' ? 'ok' : 'err'); }
-            }
-          } else {
-            // Nova entrada
-            const li = document.createElement('li');
-            li.dataset.step = stepKey;
-            if (stepKey === 'wait' || stepKey === 'end') {
-              li.innerHTML = `<span class="step-msg">${desc}</span>`;
-            } else {
-              li.innerHTML = `<span class="step-num">${stepKey}</span><span class="step-desc">${desc}</span><span class="step-result"></span>`;
-            }
-            testLogBox.insertBefore(li, testLogBox.firstChild);
-          }
-        }
       };
     }
 

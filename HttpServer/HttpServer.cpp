@@ -50,27 +50,16 @@ static std::string int_vec_to_json(const std::vector<int>& v) {
     return s;
 }
 
-static std::string json_escape(const std::string& s) {
-    std::string out;
-    for (char c : s) {
-        if (c == '"')  out += "\\\"";
-        else if (c == '\\') out += "\\\\";
-        else out += c;
-    }
-    return out;
-}
 
 static std::string build_ws_msg(const std::unordered_map<int, bool>& inputs,
                                  const std::unordered_map<int, bool>& outputs,
                                  const std::vector<int>&               edges,
-                                 const std::unordered_map<int, int>&   counts,
-                                 const std::string&                    test_log)
+                                 const std::unordered_map<int, int>&   counts)
 {
     return "{\"inputs\":"      + bool_map_to_json(inputs)
          + ",\"outputs\":"     + bool_map_to_json(outputs)
          + ",\"last_edges\":"  + int_vec_to_json(edges)
-         + ",\"edge_counts\":" + int_map_to_json(counts)
-         + ",\"test_log\":\""  + json_escape(test_log) + "\"}";
+         + ",\"edge_counts\":" + int_map_to_json(counts) + "}";
 }
 
 // ── Parser JSON entrante {"1":true,"2":false} → unordered_map ─────────────────
@@ -109,17 +98,15 @@ static void push_if_pending(struct mg_mgr* mgr) {
     std::unordered_map<int, bool> inputs, outputs;
     std::unordered_map<int, int>  counts;
     std::vector<int>              edges;
-    std::string                   test_log;
     {
         std::lock_guard<std::mutex> lk(se.mtx);
         inputs   = se.inputs;
         outputs  = se.outputs;
         edges    = se.last_edges;
         counts   = se.edge_counts;
-        test_log = se.test_log;
     }
 
-    std::string msg = build_ws_msg(inputs, outputs, edges, counts, test_log);
+    std::string msg = build_ws_msg(inputs, outputs, edges, counts);
 
     for (struct mg_connection* c = mgr->conns; c != nullptr; c = c->next) {
         if (c->is_websocket) {
@@ -143,15 +130,13 @@ static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
             // Enviar estado actual al cliente recién conectado
             std::unordered_map<int, bool> inputs, outputs;
             std::unordered_map<int, int>  counts;
-            std::string                   test_log;
             {
                 std::lock_guard<std::mutex> lk(se.mtx);
                 inputs   = se.inputs;
                 outputs  = se.outputs;
                 counts   = se.edge_counts;
-                test_log = se.test_log;
             }
-            std::string msg = build_ws_msg(inputs, outputs, {}, counts, test_log);
+            std::string msg = build_ws_msg(inputs, outputs, {}, counts);
             mg_ws_send(c, msg.c_str(), msg.size(), WEBSOCKET_OP_TEXT);
 
         } else if (mg_match(hm->uri, mg_str("/configs"), NULL)
