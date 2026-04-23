@@ -57,6 +57,6 @@ Output: `build/app.exe`. The script compiles `mongoose/mongoose.c` with `gcc` th
 - `signals.h` — all QP signal enums and event struct definitions
 - `SharedState.h` — the shared struct between QV and Mongoose threads
 - `InputConfig.h` — `InputConfig` struct: `id`, `logic_positive`, `detection_always`, `linked_outputs`
-- `TestIOReader.hpp` — test steps + `TestObserver` AO + `verifyStep()` + `makeTestReader()`
+- `Test/TestController.hpp` — TestObserver AO + verifyStep() + makeTestReader() + g_* globals
 - `docs/sistema.drawio` — system architecture diagram
 - `qp_config.hpp` — QP tunables (`QF_MAX_ACTIVE=32`, `QF_MAX_EPOOL=3`)

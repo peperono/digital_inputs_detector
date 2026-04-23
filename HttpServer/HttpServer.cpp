@@ -1,5 +1,6 @@
 #include "HttpServer.h"
 #include "../SharedState.h"
+#include "../RemoteIOState.h"
 #include "../signals.h"
 #include <thread>
 #include <atomic>
@@ -204,7 +205,6 @@ static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
         }
 
     } else if (ev == MG_EV_WS_MSG) {
-        // Mensaje entrante del browser → postear REMOTE_INPUT_SIG al AO
         auto* wm = static_cast<struct mg_ws_message*>(ev_data);
         if ((wm->flags & 0xF) != WEBSOCKET_OP_TEXT) return;
 
@@ -216,17 +216,10 @@ static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
         if (ioff > 0) parse_bool_object({wm->data.buf + ioff, (size_t)ilen}, inputs);
         if (ooff > 0) parse_bool_object({wm->data.buf + ooff, (size_t)olen}, outputs);
 
-        if ((!inputs.empty() || !outputs.empty()) && s_edgeDetector) {
-            auto* evt    = Q_NEW(RemoteInputEvt, REMOTE_INPUT_SIG);
-            evt->n_inputs  = 0;
-            evt->n_outputs = 0;
-            for (auto const& [id, v] : inputs)
-                if (evt->n_inputs  < RemoteInputEvt::MAX_IOS)
-                    evt->inputs[evt->n_inputs++]   = {id, v};
-            for (auto const& [id, v] : outputs)
-                if (evt->n_outputs < RemoteInputEvt::MAX_IOS)
-                    evt->outputs[evt->n_outputs++] = {id, v};
-            s_edgeDetector->post_(evt, nullptr);
+        if (!inputs.empty() || !outputs.empty()) {
+            std::lock_guard<std::mutex> lk(remoteIO.mtx);
+            for (auto const& [id, v] : inputs)  remoteIO.inputs[id]  = v;
+            for (auto const& [id, v] : outputs) remoteIO.outputs[id] = v;
         }
     }
 }
@@ -235,6 +228,16 @@ static void http_fn(struct mg_connection* c, int ev, void* ev_data) {
 
 static void post_reconfigure(const std::vector<InputConfig>& configs) {
     if (!s_edgeDetector) return;
+    {
+        std::lock_guard<std::mutex> lk(remoteIO.mtx);
+        remoteIO.inputs.clear();
+        remoteIO.outputs.clear();
+        for (const auto& cfg : configs) {
+            remoteIO.inputs[cfg.id] = false;
+            for (int out_id : cfg.linked_outputs)
+                remoteIO.outputs[out_id] = false;
+        }
+    }
     auto* evt = Q_NEW(ReconfigureEvt, RECONFIGURE_SIG);
     evt->n_configs = 0;
     for (const auto& cfg : configs) {

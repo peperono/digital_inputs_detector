@@ -31,20 +31,25 @@ Q_STATE_DEF(Monitor, running) {
         case IO_STATE_CHANGED_SIG: {
             auto const* evt = Q_EVT_CAST(IOStateEvt);
             for (auto const& [id, state] : evt->inputs) {
-                std::printf("[Monitor] entrada %d -> %s\n", id, state ? "ON" : "OFF");
+                auto it = m_prevInputs.find(id);
+                if (it == m_prevInputs.end() || it->second != state)
+                    std::printf("[Monitor] entrada %d -> %s\n", id, state ? "ON" : "OFF");
             }
+            m_prevInputs = evt->inputs;
             for (auto const& [id, state] : evt->outputs) {
-                std::printf("[Monitor] salida  %d -> %s\n", id, state ? "ON" : "OFF");
+                auto it = m_prevOutputs.find(id);
+                if (it == m_prevOutputs.end() || it->second != state)
+                    std::printf("[Monitor] sortida %d -> %s\n", id, state ? "ON" : "OFF");
             }
+            m_prevOutputs = evt->outputs;
             status = Q_HANDLED();
             break;
         }
 
         case EDGE_DETECTED_SIG: {
             auto const* evt = Q_EVT_CAST(EdgeDetectedEvt);
-            for (int id : evt->input_ids) {
-                std::printf("[Monitor] flanco detectado en entrada %d\n", id);
-            }
+            for (int id : evt->input_ids)
+                std::printf("[Monitor] flanc entrada %d\n", id);
             status = Q_HANDLED();
             break;
         }

@@ -44,12 +44,7 @@ Q_STATE_DEF(DigitalEdgeDetector, operating) {
         case EDGE_DETECTOR_POLL_SIG: {
             std::unordered_map<int, bool> inputs;
             std::unordered_map<int, bool> outputs;
-            if (m_remoteMode) {
-                inputs  = m_remoteInputs;
-                outputs = m_remoteOutputs;
-            } else {
-                m_reader(inputs, outputs);
-            }
+            m_reader(inputs, outputs);
 
             if ((inputs != m_prevInputs) || (outputs != m_prevOutputs)) {
                 m_prevInputs  = inputs;
@@ -85,7 +80,6 @@ Q_STATE_DEF(DigitalEdgeDetector, operating) {
                     PUBLISH(&m_edgeEvt, this);
                 }
 
-                // Escriure directament a SharedState (abans ho feia WsPublisher)
                 {
                     std::lock_guard<std::mutex> lk(se.mtx);
                     se.inputs  = inputs;
@@ -105,18 +99,6 @@ Q_STATE_DEF(DigitalEdgeDetector, operating) {
             break;
         }
 
-        case REMOTE_INPUT_SIG: {
-            auto const* evt = Q_EVT_CAST(RemoteInputEvt);
-            m_remoteInputs.clear();
-            m_remoteOutputs.clear();
-            for (int i = 0; i < evt->n_inputs;  ++i)
-                m_remoteInputs[evt->inputs[i].id]   = evt->inputs[i].value;
-            for (int i = 0; i < evt->n_outputs; ++i)
-                m_remoteOutputs[evt->outputs[i].id] = evt->outputs[i].value;
-            status = Q_HANDLED();
-            break;
-        }
-
         case RECONFIGURE_SIG: {
             auto const* evt = Q_EVT_CAST(ReconfigureEvt);
             std::vector<InputConfig> newConfigs;
@@ -131,18 +113,8 @@ Q_STATE_DEF(DigitalEdgeDetector, operating) {
                 newConfigs.push_back(std::move(cfg));
             }
             configure(newConfigs);
-            // Reset IO tracking so next poll emits IO_STATE_CHANGED_SIG
             m_prevInputs.clear();
             m_prevOutputs.clear();
-            if (m_remoteMode) {
-                m_remoteInputs.clear();
-                m_remoteOutputs.clear();
-                for (const auto& cfg : m_configs) {
-                    m_remoteInputs[cfg.id] = false;
-                    for (int out_id : cfg.linked_outputs)
-                        m_remoteOutputs[out_id] = false;
-                }
-            }
             {
                 std::lock_guard<std::mutex> lk(se.mtx);
                 se.configs = m_configs;

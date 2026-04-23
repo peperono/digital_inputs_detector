@@ -4,12 +4,15 @@
 #include "Monitor/Monitor.h"
 #include "HttpServer/HttpServer.h"
 #include "SharedState.h"
-#include "TestIOReader.hpp"
-#include <algorithm>
+#include "RemoteIOState.h"
+#include "Test/TestController.hpp"
+#include "IOReader_Remot.hpp"
+#include "mongoose/mongoose.h"
 #include <cstdio>
 #include <cstdlib>
 
-SharedState se;
+SharedState   se;
+RemoteIOState remoteIO;
 
 // ── QP assertion handler (requerido por el framework) ─────────────────────────
 extern "C" Q_NORETURN Q_onError(char const * const module, int_t const id) {
@@ -24,6 +27,7 @@ static QP::QSubscrList subscrSto[MAX_SIG];
 static QP::QEvtPtr edgeDetectorQSto[10];
 static QP::QEvtPtr controlQSto[10];
 static QP::QEvtPtr testObserverQSto[10];
+
 // ── Callbacks requeridos por el port win32-qv ─────────────────────────────────
 namespace QP {
 namespace QF {
@@ -51,13 +55,28 @@ int main() {
     int choice = 1;
     std::scanf("%d", &choice);
 
+    std::printf("Mostrar missatges de depuracio de Mongoose? (s/n): ");
+    char dbg = 'n';
+    std::scanf(" %c", &dbg);
+    mg_log_set(dbg == 's' ? MG_LL_DEBUG : MG_LL_NONE);
+
     // Configuracion de entradas
     const std::vector<InputConfig> configs = {
         InputConfig{1, /*logic_positive=*/true, /*always=*/true,  {}   },
         InputConfig{2, /*logic_positive=*/true, /*always=*/false, {10} }
     };
 
-    IOReader reader = (choice == 2) ? IOReader{} : makeTestReader();
+    // Inicialitzar remoteIO amb l'estat inicial (tot a false)
+    if (choice == 2) {
+        std::lock_guard<std::mutex> lk(remoteIO.mtx);
+        for (const auto& cfg : configs) {
+            remoteIO.inputs[cfg.id] = false;
+            for (int out_id : cfg.linked_outputs)
+                remoteIO.outputs[out_id] = false;
+        }
+    }
+
+    IOReader reader = (choice == 2) ? makeRemoteReader() : makeTestReader();
 
     // ── Active object instances ───────────────────────────────────────────────
     static DigitalEdgeDetector edgeDetector{ std::move(reader), 10U };
@@ -65,14 +84,11 @@ int main() {
     static TestObserver        testObserver;
 
     edgeDetector.configure(configs);
-    edgeDetector.setRemoteMode(choice == 2);
 
     // Inicializar SharedState
     {
         std::lock_guard<std::mutex> lk(se.mtx);
-        se.configs     = configs;
-        // Pre-populate inputs/outputs so the browser sees the IO structure
-        // on the very first WebSocket message (before the first poll event).
+        se.configs = configs;
         for (const auto& cfg : configs) {
             se.inputs[cfg.id] = false;
             for (int out_id : cfg.linked_outputs)
@@ -82,10 +98,6 @@ int main() {
 
     QP::QF::init();
     QP::QActive::psInit(subscrSto, Q_DIM(subscrSto));
-
-    // Pool para RemoteInputEvt y ReconfigureEvt — orden creciente de tamaño obligatorio en QP
-    static std::uint8_t remoteInputPool[8 * sizeof(RemoteInputEvt)];
-    QP::QF::poolInit(remoteInputPool, sizeof(remoteInputPool), sizeof(RemoteInputEvt));
 
     static std::uint8_t reconfigPool[4 * sizeof(ReconfigureEvt)];
     QP::QF::poolInit(reconfigPool, sizeof(reconfigPool), sizeof(ReconfigureEvt));
