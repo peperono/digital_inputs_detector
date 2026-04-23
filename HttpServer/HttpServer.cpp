@@ -1,5 +1,5 @@
 #include "HttpServer.h"
-#include "../SharedState.h"
+#include "../DigitalEdgeDetector/SharedState.h"
 #include "../RemoteIOState.h"
 #include "../signals.h"
 #include <thread>

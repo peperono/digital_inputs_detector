@@ -1,5 +1,5 @@
 #include "DigitalEdgeDetector.h"
-#include "../SharedState.h"
+#include "SharedState.h"
 #include <mutex>
 
 // ── Constructor ───────────────────────────────────────────────────────────────

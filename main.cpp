@@ -3,7 +3,7 @@
 #include "DigitalEdgeDetector/DigitalEdgeDetector.h"
 #include "Monitor/Monitor.h"
 #include "HttpServer/HttpServer.h"
-#include "SharedState.h"
+#include "DigitalEdgeDetector/SharedState.h"
 #include "RemoteIOState.h"
 #include "Test/TestController.hpp"
 #include "IOReader_Remot.hpp"

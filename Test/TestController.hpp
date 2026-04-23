@@ -1,6 +1,6 @@
 #pragma once
 #include "DigitalEdgeDetector/DigitalEdgeDetector.h"
-#include "SharedState.h"
+#include "../DigitalEdgeDetector/SharedState.h"
 #include "qpcpp/include/qpcpp.hpp"
 #include "signals.h"
 #include <vector>
