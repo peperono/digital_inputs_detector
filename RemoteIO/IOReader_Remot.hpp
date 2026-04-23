@@ -1,6 +1,6 @@
 #pragma once
-#include "DigitalEdgeDetector/DigitalEdgeDetector.h"
-#include "RemoteIOState.h"
+#include "../DigitalEdgeDetector/DigitalEdgeDetector.h"
+#include "../RemoteIOState.h"
 #include <mutex>
 
 inline IOReader makeRemoteReader() {

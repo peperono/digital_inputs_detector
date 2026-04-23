@@ -6,7 +6,7 @@
 #include "DigitalEdgeDetector/SharedState.h"
 #include "RemoteIOState.h"
 #include "Test/TestController.hpp"
-#include "IOReader_Remot.hpp"
+#include "RemoteIO/IOReader_Remot.hpp"
 #include "mongoose/mongoose.h"
 #include <cstdio>
 #include <cstdlib>
