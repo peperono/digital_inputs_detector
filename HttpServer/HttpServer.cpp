@@ -1,6 +1,6 @@
 #include "HttpServer.h"
 #include "../DigitalEdgeDetector/SharedState.h"
-#include "../RemoteIOState.h"
+#include "../RemoteIO/RemoteIOState.h"
 #include "../signals.h"
 #include <thread>
 #include <atomic>
