@@ -60,3 +60,44 @@ Output: `build/app.exe`. The script compiles `mongoose/mongoose.c` with `gcc` th
 - `Test/TestController.hpp` — TestObserver AO + verifyStep() + makeTestReader() + g_* globals
 - `docs/sistema.drawio` — system architecture diagram
 - `qp_config.hpp` — QP tunables (`QF_MAX_ACTIVE=32`, `QF_MAX_EPOOL=3`)
+
+El diagrama de referència és `docs/ControlRemot.drawio`. Segueix aquest esquema visual:
+
+### Codi de colors
+
+| Color | Hex fill / stroke | Representa |
+|---|---|---|
+| Blau | `#dae8fc` / `#6c8ebf` | Active Object (fil QP, `QP::QActive`) |
+| Verd | `#d5e8d4` / `#82b366` | Event QP (entrada o sortida, `QP::QEvt`) |
+| Groc | `#fff2cc` / `#d6b656` | Memòria compartida entre fils (`SharedState`, mutex) |
+| Rosa | `#ffcccc` / `#36393d` | Thread Mongoose (`HttpServer`) |
+| Blanc | `#ffffff` / `#666666` | Actor extern (Browser, REST, WebSocket) |
+
+### Estructura d'un Active Object
+
+Cada AO és un rectangle blau amb `verticalAlign=top`, títol en negreta `NomComponent (QP::QActive)`. A l'interior, rectangles fills independents:
+- Esquerra: events d'entrada (verd), un per signal
+- Dreta: events de sortida publicats (verd) i variables de `SharedState` (groc)
+
+### Etiquetes de les arestes
+
+| Etiqueta | Significat |
+|---|---|
+| `publish` | `QF_PUBLISH` — bus QP, qualsevol subscrit el rep |
+| `POST` | `QActive::POST` — directe a un AO, thread-safe |
+| `push` | HttpServer llegeix `SharedState` i envia per WebSocket |
+| `write` | Escriptura a `SharedState` sota mutex |
+
+### Convencions generals
+
+- Tot el diagrama va dins un `shape=umlFrame` amb títol `NomProjecte / Data`.
+- La llegenda de colors és un node `text` dins el frame, cantonada inferior dreta.
+- Format del nom d'event als nodes: `NomEvt\n(SIGNAL_NAME, mecanisme)` — dues línies, `fontSize=8`.
+- Arestes ortogonals (`edgeStyle=orthogonalEdgeStyle`) amb punts de routing explícits quan hi ha creuaments.
+
+## Convencions
+
+- Codi i comentaris en **català**
+- Les màquines d'estat segueixen els patrons QP/C++ (HSM jeràrquiques, `Q_TRAN`, `Q_SUPER`, `QM_TRAN`)
+- Els events dinàmics s'allotgen via `QF_NEW` i s'alliberen automàticament pel framework
+- Vegeu `.claude/plugins/qpcpp-patterns/` per als patrons habituals de QP/C++ al projecte
