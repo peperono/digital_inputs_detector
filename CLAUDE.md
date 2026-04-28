@@ -39,7 +39,7 @@ Output: `build/app.exe`. The script compiles `mongoose/mongoose.c` with `gcc` th
 
 **Cross-thread data:** `SharedState se` (defined in `main.cpp`, declared `extern` in `DigitalEdgeDetector/SharedState.h`) is the only shared data between the QV thread and the Mongoose thread. All access is guarded by `se.mtx`. `DigitalEdgeDetector` writes `se.inputs`, `se.outputs`, `se.last_edges`, `se.edge_counts` and sets `se.push_pending = true` directly in the poll handler. The Mongoose thread reads `se` and pushes WebSocket messages when `push_pending` is set.
 
-**IOReader injection:** `DigitalEdgeDetector` accepts an `IOReader = std::function<void(map<int,bool>&, map<int,bool>&)>` at construction. In test mode `makeTestReader()` returns a lambda cycling through `TestStep` scenarios. In remote mode the reader is empty (`IOReader{}`) and state comes from `REMOTE_INPUT_SIG` events posted by the Mongoose thread. Platform implementations: `IOReader_ESP32` (reads GPIO hardware), `IOReader_Win32` (simulates IO).
+**IOReader injection:** `DigitalEdgeDetector` accepts an `IOReader = std::function<void(map<int,bool>&, map<int,bool>&)>` at construction. In test mode `makeTestReader()` (`Test/TestController.hpp`) returns a lambda cycling through `TestStep` scenarios. In remote mode `makeRemoteReader()` (`RemoteIO/IOReader_Remot.hpp`) returns a lambda that reads from `RemoteIOState remoteIO` (mutex-protected, written by the Mongoose thread via WebSocket). Future platform implementations: `HWReader` (reads GPIO hardware).
 
 **Event memory:** `IOStateEvt` and `EdgeDetectedEvt` use static (zero-pool) semantics because they hold `std::vector`/`std::unordered_map` which are incompatible with QP memory pools. This is safe under the QV cooperative scheduler. `RemoteInputEvt` and `ReconfigureEvt` use QP memory pools (initialized in `main.cpp`). Max 16 configs per `ReconfigureEvt`.
 
@@ -61,39 +61,7 @@ Output: `build/app.exe`. The script compiles `mongoose/mongoose.c` with `gcc` th
 - `docs/sistema.drawio` — system architecture diagram
 - `qp_config.hpp` — QP tunables (`QF_MAX_ACTIVE=32`, `QF_MAX_EPOOL=3`)
 
-El diagrama de referència és `docs/ControlRemot.drawio`. Segueix aquest esquema visual:
-
-### Codi de colors
-
-| Color | Hex fill / stroke | Representa |
-|---|---|---|
-| Blau | `#dae8fc` / `#6c8ebf` | Active Object (fil QP, `QP::QActive`) |
-| Verd | `#d5e8d4` / `#82b366` | Event QP (entrada o sortida, `QP::QEvt`) |
-| Groc | `#fff2cc` / `#d6b656` | Memòria compartida entre fils (`SharedState`, mutex) |
-| Rosa | `#ffcccc` / `#36393d` | Thread Mongoose (`HttpServer`) |
-| Blanc | `#ffffff` / `#666666` | Actor extern (Browser, REST, WebSocket) |
-
-### Estructura d'un Active Object
-
-Cada AO és un rectangle blau amb `verticalAlign=top`, títol en negreta `NomComponent (QP::QActive)`. A l'interior, rectangles fills independents:
-- Esquerra: events d'entrada (verd), un per signal
-- Dreta: events de sortida publicats (verd) i variables de `SharedState` (groc)
-
-### Etiquetes de les arestes
-
-| Etiqueta | Significat |
-|---|---|
-| `publish` | `QF_PUBLISH` — bus QP, qualsevol subscrit el rep |
-| `POST` | `QActive::POST` — directe a un AO, thread-safe |
-| `push` | HttpServer llegeix `SharedState` i envia per WebSocket |
-| `write` | Escriptura a `SharedState` sota mutex |
-
-### Convencions generals
-
-- Tot el diagrama va dins un `shape=umlFrame` amb títol `NomProjecte / Data`.
-- La llegenda de colors és un node `text` dins el frame, cantonada inferior dreta.
-- Format del nom d'event als nodes: `NomEvt\n(SIGNAL_NAME, mecanisme)` — dues línies, `fontSize=8`.
-- Arestes ortogonals (`edgeStyle=orthogonalEdgeStyle`) amb punts de routing explícits quan hi ha creuaments.
+El diagrama de referència és `docs/sistema.drawio`. Les convencions visuals (colors, fletxes, etiquetes, estructura dels nodes) estan documentades a [`docs/drawio-conventions.md`](docs/drawio-conventions.md).
 
 ## Convencions
 
