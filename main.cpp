@@ -79,7 +79,7 @@ int main() {
     IOReader reader = (choice == 2) ? makeRemoteReader() : makeTestReader();
 
     // ── Active object instances ───────────────────────────────────────────────
-    static DigitalEdgeDetector edgeDetector{ std::move(reader), 10U };
+    static DigitalEdgeDetector edgeDetector{ std::move(reader), 1U };
     static Monitor             monitor;
     static TestObserver        testObserver;
 

@@ -8,6 +8,7 @@
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
+#include <ctime>
 #include <string>
 
 static const char* TEST_LOG_FILE = "test_result.log";
@@ -128,7 +129,7 @@ static void verifyStep(int stepIdx, const TestStep& s,
 
     // Escriure resultat al fitxer de log
     if (FILE* f = std::fopen(TEST_LOG_FILE, "a")) {
-        std::fprintf(f, "%d|%s|%s\n", stepIdx + 1, s.description, ok ? "OK" : "ERROR");
+        std::fprintf(f, "%d,\"%s\",%s\n", stepIdx + 1, s.description, ok ? "OK" : "ERROR");
         std::fclose(f);
     }
 
@@ -158,6 +159,16 @@ static void verifyStep(int stepIdx, const TestStep& s,
 //  Paso 11 — TANCAMENT entrada 2, sortida 10=ON → IO_STATE_CHANGED_SIG + EDGE_DETECTED_SIG(2)
 
 inline IOReader makeTestReader() {
+    {
+        std::time_t t = std::time(nullptr);
+        char buf[32];
+        std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", std::localtime(&t));
+        if (FILE* f = std::fopen(TEST_LOG_FILE, "w")) {
+            std::fprintf(f, "# Test iniciat: %s\n", buf);
+            std::fclose(f);
+        }
+    }
+
     static const std::vector<TestStep> steps = {
         { {{1,false},{2,false}}, {{10,false}},
           "Estat inicial: E1=OBERT, E2=OBERT, S10=OBERT",                            {} },
@@ -190,6 +201,18 @@ inline IOReader makeTestReader() {
 
         { {{1,false},{2,false}}, {{10,true}},
           "(E2 = OBERT) => (sense events)", {} },
+
+        { {{1,false},{2,false}}, {{10,false}},
+          "(S10 = OBERT) => (sense events)", {} },
+
+        { {{1,false},{2,true}},  {{10,false}},
+          "(E2 = TANCAT) => (sense events)", {} },
+
+        { {{1,false},{2,true},{3,false}}, {{10,false}},
+          "(E3 = OBERT) => (sense events)", {} },
+
+        { {{1,false},{2,true},{3,true}},  {{10,false}},
+          "(E3 = TANCAT) => (sense events)", {} },
     };
 
     static int step = 0;
@@ -201,8 +224,8 @@ inline IOReader makeTestReader() {
               std::unordered_map<int, bool>& outputs)
     {
         static auto stepTime = std::chrono::steady_clock::now();
-        static const std::chrono::milliseconds STEP_DELAY{200};
-        static const std::chrono::milliseconds INIT_DELAY{200};
+        static const std::chrono::milliseconds STEP_DELAY{10};
+        static const std::chrono::milliseconds INIT_DELAY{10};
         static std::unordered_map<int, bool> lastInputs;
         static std::unordered_map<int, bool> lastOutputs;
         static bool announced = false;
