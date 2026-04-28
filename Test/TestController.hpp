@@ -213,6 +213,44 @@ inline IOReader makeTestReader() {
 
         { {{1,false},{2,true},{3,true}},  {{10,false}},
           "(E3 = TANCAT) => (sense events)", {} },
+
+        { {{1,false},{2,false},{3,true}}, {{10,true}},
+          "(E1 = OBERT, E2 = OBERT, S10 = TANCAT) => (sense events)", {} },
+
+        { {{1,true},{2,true},{3,true}},   {{10,true}},
+          "(E1 = TANCAT, E2 = TANCAT) => (flanc E1, flanc E2)", {1,2} },
+
+        { {{1,false},{2,false},{3,true}}, {{10,true}},
+          "(E1 = OBERT, E2 = OBERT) => (sense events)", {} },
+
+        { {{1,true},{2,true},{3,true}},   {{10,true}},
+          "(E1 = TANCAT, E2 = TANCAT) => (flanc E1, flanc E2)", {1,2} },
+
+        { {{1,false},{2,false},{3,true}}, {{10,true}},
+          "(E1 = OBERT, E2 = OBERT) => (sense events)", {} },
+
+        { {{1,true},{2,true},{3,true}},   {{10,true}},
+          "(E1 = TANCAT, E2 = TANCAT) => (flanc E1, flanc E2)", {1,2} },
+
+        { {{1,false},{2,false},{3,true}}, {{10,true}},
+          "(E1 = OBERT, E2 = OBERT) => (sense events)", {} },
+
+        { {{1,true},{2,true},{3,true}},   {{10,true}},
+          "(E1 = TANCAT, E2 = TANCAT) => (flanc E1, flanc E2)", {1,2} },
+
+        // ── Casos logic_positive=false, always=true (entrada 4) ──────────────
+
+        { {{1,true},{2,true},{3,true},{4,true}},  {{10,true}},
+          "(E4 = TANCAT) => (sense events)", {} },
+
+        { {{1,true},{2,true},{3,true},{4,false}}, {{10,true}},
+          "(E4 = OBERT) => (flanc E4)", {4} },
+
+        { {{1,true},{2,true},{3,true},{4,true}},  {{10,true}},
+          "(E4 = TANCAT) => (sense events)", {} },
+
+        { {{1,true},{2,true},{3,true},{4,false}}, {{10,true}},
+          "(E4 = OBERT) => (flanc E4)", {4} },
     };
 
     static int step = 0;

@@ -62,8 +62,9 @@ int main() {
 
     // Configuracion de entradas
     const std::vector<InputConfig> configs = {
-        InputConfig{1, /*logic_positive=*/true, /*always=*/true,  {}   },
-        InputConfig{2, /*logic_positive=*/true, /*always=*/false, {10} }
+        InputConfig{1, /*logic_positive=*/true,  /*always=*/true,  {}   },
+        InputConfig{2, /*logic_positive=*/true,  /*always=*/false, {10} },
+        InputConfig{4, /*logic_positive=*/false, /*always=*/true,  {}   }
     };
 
     // Inicialitzar remoteIO amb l'estat inicial (tot a false)
